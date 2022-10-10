@@ -12,6 +12,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object createBean(String beanName, BeanDefinition beanDefinition) {
         Object bean;
         try {
+            // 创建实例 可在这里指定策略 （jdk/cglib）
             bean = beanDefinition.getBeanClass().newInstance();
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
