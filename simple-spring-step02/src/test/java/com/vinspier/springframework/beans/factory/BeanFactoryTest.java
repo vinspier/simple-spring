@@ -16,7 +16,7 @@ public class BeanFactoryTest {
         // 2、注册bean定义
         BeanDefinition beanDefinition = new BeanDefinition(StockServiceImpl.class);
         beanFactory.registryBeanDefinition("stockService",beanDefinition);
-        // 3、从容器中获取实例 会经历实例第一次初始化
+        // 3、从容器中获取实例 会经历第一次实例初始化
         StockService stockService = (StockService) beanFactory.getBean("stockService");
 
         // 3、再次从容器中获取实例
