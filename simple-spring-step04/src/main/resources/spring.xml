@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans>
+
+    <bean id="stockDao" name="stockDao" class="com.vinspier.biz.dao.impl.StockDaoImpl">
+
+    </bean>
+
+    <bean id="stockService" name="stockService" class="com.vinspier.biz.service.impl.StockServiceImpl">
+        <property name="stockDao" ref="stockDao"/>
+        <property name="warehouse" value="ewe"/>
+    </bean>
+
+</beans>
