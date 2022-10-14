@@ -1,8 +1,8 @@
 package com.vinspier.springframework.context.support;
 
-import com.vinspier.springframework.test.beans.factory.config.BeanFactoryPostProcessor;
-import com.vinspier.springframework.test.beans.factory.config.BeanPostProcessor;
-import com.vinspier.springframework.test.beans.factory.support.ConfigurableListableBeanFactory;
+import com.vinspier.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
+import com.vinspier.springframework.beans.factory.support.ConfigurableListableBeanFactory;
 import com.vinspier.springframework.context.ConfigurableApplicationContext;
 import com.vinspier.springframework.core.io.AbstractResourceLoader;
 

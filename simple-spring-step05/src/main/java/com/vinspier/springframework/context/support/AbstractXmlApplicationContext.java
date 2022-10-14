@@ -1,7 +1,7 @@
 package com.vinspier.springframework.context.support;
 
-import com.vinspier.springframework.test.beans.factory.support.BeanDefinitionRegistry;
-import com.vinspier.springframework.test.beans.factory.xml.XmlBeanDefinitionReader;
+import com.vinspier.springframework.beans.factory.support.BeanDefinitionRegistry;
+import com.vinspier.springframework.beans.factory.xml.XmlBeanDefinitionReader;
 
 import java.util.Set;
 

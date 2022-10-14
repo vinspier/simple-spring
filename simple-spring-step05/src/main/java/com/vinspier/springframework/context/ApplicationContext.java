@@ -1,6 +1,6 @@
 package com.vinspier.springframework.context;
 
-import com.vinspier.springframework.test.beans.factory.ListableBeanFactory;
+import com.vinspier.springframework.beans.factory.ListableBeanFactory;
 
 /**
  * 容器上下文

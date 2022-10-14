@@ -1,8 +1,8 @@
 package com.vinspier.springframework.context.support;
 
-import com.vinspier.springframework.test.beans.factory.support.BeanDefinitionRegistry;
-import com.vinspier.springframework.test.beans.factory.support.ConfigurableListableBeanFactory;
-import com.vinspier.springframework.test.beans.factory.support.DefaultListableBeanFactory;
+import com.vinspier.springframework.beans.factory.support.BeanDefinitionRegistry;
+import com.vinspier.springframework.beans.factory.support.ConfigurableListableBeanFactory;
+import com.vinspier.springframework.beans.factory.support.DefaultListableBeanFactory;
 
 /**
  * 可支持上下文刷新 抽象行为
