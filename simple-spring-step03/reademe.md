@@ -18,7 +18,7 @@
       + 增加 指定参数 获取实例
     + 中间抽象层定义获取bean抽象获取-创建实现模版行为 AbstractBeanFactory
     + 底层抽象层实现bean的创建流程 AbstractAutowireCapableBeanFactory
-      + 增加 实例初始化策略 InstantiationStrategy
+      + 增加 实例创建策略 InstantiationStrategy
         + jdk反射机制实现
         + cglib动态字节码实现
       + 增加 实例属性填充

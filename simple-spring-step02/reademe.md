@@ -16,12 +16,12 @@
     + 末端实现类实现 实例元数据动作 并继承以上的工厂行为
   
 ## 较上一个版本 新增
-+ 1、增加实例初始化策略 InstantiationStrategy
++ 1、增加实例创建策略 InstantiationStrategy
   + jdk反射机制实现
   + cglib动态字节码实现
   
 + 2、 底层抽象层实现bean的创建流程 AbstractAutowireCapableBeanFactory
-  + 增加 实例初始化策略 cglib
+  + 增加 实例创建策略 cglib
 
 + 3、bean创建工厂拓展能力
   + 增加 指定参数 获取实例

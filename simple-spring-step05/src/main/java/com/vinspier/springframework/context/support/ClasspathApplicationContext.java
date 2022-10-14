@@ -13,7 +13,7 @@ public class ClasspathApplicationContext extends AbstractXmlApplicationContext {
     private Set<String> configLocations = new HashSet<>();
 
     public ClasspathApplicationContext() {
-
+        refresh();
     }
 
     public ClasspathApplicationContext(String configLocation) {
