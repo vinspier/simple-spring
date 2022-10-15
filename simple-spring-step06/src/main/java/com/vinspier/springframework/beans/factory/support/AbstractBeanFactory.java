@@ -1,5 +1,6 @@
 package com.vinspier.springframework.beans.factory.support;
 
+import com.vinspier.springframework.beans.exception.BeansException;
 import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 import com.vinspier.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -24,19 +25,34 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
 
     @Override
     public Object getBean(String beanName, Object... args) {
-        return doGetBean(beanName,args);
+        return doGetBean(beanName,args,null);
+    }
+
+    @Override
+    public <T> T getBean(String name, Class<T> type) {
+        return doGetBean(name,null,type);
     }
 
     /**
      * 定义 实例创建 抽象流程
      * */
-    public <T> T doGetBean(final String beanName,final Object[] args) {
+    @SuppressWarnings("unchecked")
+    public <T> T doGetBean(final String beanName,final Object[] args,Class<T> requiredType) {
         Object result = getSingleton(beanName);
         if (null != result){
+            this.validBeanClassType(result,requiredType);
             return (T) result;
         }
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
-        return (T) createBean(beanName,beanDefinition,args);
+        result = createBean(beanName,beanDefinition,args);
+        this.validBeanClassType(result,requiredType);
+        return (T) result;
+    }
+
+    protected <T> void validBeanClassType(Object bean,Class<T> requiredType) {
+        if (null != requiredType && !bean.getClass().isAssignableFrom(requiredType)) {
+            throw new BeansException("could not found bean required of type " + requiredType.getSimpleName());
+        }
     }
 
     protected abstract BeanDefinition getBeanDefinition(String beanName);
