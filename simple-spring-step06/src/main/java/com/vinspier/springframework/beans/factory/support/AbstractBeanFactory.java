@@ -44,9 +44,15 @@ public abstract class AbstractBeanFactory extends DefaultSingletonBeanRegistry i
             return (T) result;
         }
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
+        this.validBeanClassType(beanDefinition.getBeanClass(),requiredType);
         result = createBean(beanName,beanDefinition,args);
-        this.validBeanClassType(result,requiredType);
         return (T) result;
+    }
+
+    protected <T> void validBeanClassType(Class<?> beanClazz,Class<T> requiredType) {
+        if (null != requiredType && !beanClazz.isAssignableFrom(requiredType)) {
+            throw new BeansException("could not found bean required of type " + requiredType.getSimpleName());
+        }
     }
 
     protected <T> void validBeanClassType(Object bean,Class<T> requiredType) {
