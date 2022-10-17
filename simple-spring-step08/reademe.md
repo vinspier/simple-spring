@@ -1,4 +1,4 @@
-# 基础版本spring容器 - version 2.2
+# 基础版本spring容器 - version 2.3
 
 ## 核心模型
 
@@ -37,6 +37,10 @@
     + 末端工厂实现类 DefaultListableBeanFactory
       + 继承以上的工厂行为，实现实例、元数据动作
       + 增加 销毁实例入口 destroySingletons
++ 4、1 外部自定义实例注册容器支持FactoryBeanRegistrySupport
+    + 容器实例存储缓存 ConcurrentHashMap<String,Object> factoryBeanMap
+    + 在beanFactory容器创建bean时 判断是否是FactoryBean的继承者 会注册其getObject方法返回的结果
+  + 增加 FactoryBean外部自定义 bean实例化工厂
   
 + 5、数据源读取配置策略 core.io包
 
@@ -80,13 +84,12 @@
       + ApplicationContextAwareProcessor
 
 
-## 较上一个版本2.1 新增 通知机制
-+ 1、增加 BeanFactory工厂通知 BeanFactoryAware
+## 较上一个版本2.2 新增 bean注册 外部自定义支持
++ 1、增加 FactoryBean外部自定义 bean实例化工厂
 
-+ 2、增加 bean加载器通知 BeanClassLoaderAware
++ 2、增加 FactoryBeanRegistrySupport外部bean注册至容器支持
+  + 在beanFactory容器创建bean时 判断是否是FactoryBean的继承者 会注册其getObject方法返回的结果
   
-+ 2、增加 bean名称通知 BeanNameAware
-
-+ 3、增加 bean上下文容器通知 ApplicationContextAware
-  + 有ApplicationContextAware处理器完成通知动作
-    + ApplicationContextAwareProcessor
++ 2、增加 bean使用范围
+  + 单例模式
+  + 原型模式
