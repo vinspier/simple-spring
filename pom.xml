@@ -15,6 +15,7 @@
         <module>simple-spring-step04</module>
         <module>simple-spring-step05</module>
         <module>simple-spring-step06</module>
+        <module>simple-spring-step07</module>
     </modules>
 
     <properties>
