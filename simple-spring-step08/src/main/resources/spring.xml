@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans>
+
+    <bean id="stockDao" name="stockDao" init-method="customizeInitMethod" destroy-method="customizeDestroyMethod" class="com.vinspier.biz.dao.impl.StockDaoImpl" scope="singleton">
+
+    </bean>
+
+    <bean id="stockDaoProxy" name="stockDaoProxy" class="com.vinspier.biz.dao.StockDaoProxyBeanFactory"/>
+
+    <bean id="stockService" name="stockService" class="com.vinspier.biz.service.impl.StockServiceImpl">
+        <property name="stockDao" ref="stockDao"/>
+        <property name="warehouse" value="ewe"/>
+    </bean>
+
+    <bean id="stockService1" name="stockService1" class="com.vinspier.biz.service.impl.StockServiceImpl">
+        <property name="stockDao" ref="stockDaoProxy"/>
+        <property name="warehouse" value="ewe"/>
+    </bean>
+
+    <!-- beanFactory bean 增强定义  -->
+    <bean id="customizeBeanFactoryPostProcessor" name="customizeBeanFactoryPostProcessor" class="com.vinspier.springframework.beans.factory.config.CustomizeBeanFactoryPostProcessor"/>
+    <bean id="customizeBeanPostProcessor" name="customizeBeanPostProcessor" class="com.vinspier.springframework.beans.factory.config.CustomizeBeanPostProcessor"/>
+
+</beans>
