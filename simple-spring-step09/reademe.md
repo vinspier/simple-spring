@@ -1,7 +1,7 @@
-# 基础版本spring容器 - version 2.3
-
+# 基础版本spring容器 - version 2.4
+---
 ## 核心模型
-
+---
 ### BeanFactory工厂
 + 1、实例的元数据定义 BeanDefinition
     + 类class
@@ -48,6 +48,7 @@
   + 定义标签 XmlTagEnum
   + 增加解析 自定义初始化、销毁方法解析
 
+---
 ### bean生命周期
 + 1、实例初始化定义接口 InitializingBean
 
@@ -61,7 +62,7 @@
 
 + 5、bean名称通知 BeanNameAware
 
-
+---
 ### 容器上下文Application
 + 1、增加 系统上下文容器 ApplicationContext
   + 抽象上下文定义 AbstractApplicationContext
@@ -83,13 +84,46 @@
     + 有ApplicationContextAware处理器完成通知动作
       + ApplicationContextAwareProcessor
 
+---
+### 容器 事件发布体系
++ 1、增加 事件定义 ApplicationEvent
+  + 所有的事件必须继承抽象事件 ApplicationEvent
 
-## 较上一个版本2.2 新增 bean注册 外部自定义支持
-+ 1、增加 FactoryBean外部自定义 bean实例化工厂
++ 2、增加 事件发布定义 ApplicationEventPublisher
+  + AbstractApplicationContext 继承 AbstractApplicationContext 发布事件能力
 
-+ 2、增加 FactoryBeanRegistrySupport外部bean注册至容器支持
-  + 在beanFactory容器创建bean时 判断是否是FactoryBean的继承者 会注册其getObject方法返回的结果
++ 3、增加 事件监听定义 ApplicationListener
+  + 所有的事件监听必须实现 ApplicationListener
+
++ 4、增加 事件监听发布处理中心枢纽 ApplicationEventMultiCater
+  + 内部/外部监听器存储容器 Set<ApplicationListener<? extends ApplicationEvent>> listeners
+  + 事件监听器注册入口 addApplicationListener addApplicationListeners
+  + 事件发布处理入口 multiCastEvent
+  + 核心处理中心 AbstractApplicationEventMultiCater
+
++ 5、spring容器内部自带事件和监听器
+  + ApplicationContextEventListener
+  + ApplicationContextCloseEvent
+  + ApplicationContextRefreshEvent
+
+---
+## 较上一个版本2.3 新增 spring容器 事件发布体系
++ 1、增加 事件定义 ApplicationEvent
+  + 所有的事件必须继承抽象事件 ApplicationEvent
+
++ 2、增加 事件发布定义 ApplicationEventPublisher
+  + AbstractApplicationContext 继承 AbstractApplicationContext 发布事件能力
   
-+ 2、增加 bean使用范围
-  + 单例模式
-  + 原型模式
++ 3、增加 事件监听定义 ApplicationListener
+  + 所有的事件监听必须实现 ApplicationListener
+
++ 4、增加 事件监听发布处理中心枢纽 ApplicationEventMultiCater
+  + 内部/外部监听器存储容器 Set<ApplicationListener<? extends ApplicationEvent>> listeners
+  + 事件监听器注册入口 addApplicationListener addApplicationListeners
+  + 事件发布处理入口 multiCastEvent
+  + 核心处理中心 AbstractApplicationEventMultiCater
+
++ 5、spring容器内部自带事件和监听器
+  + ApplicationContextEventListener
+  + ApplicationContextCloseEvent
+  + ApplicationContextRefreshEvent
