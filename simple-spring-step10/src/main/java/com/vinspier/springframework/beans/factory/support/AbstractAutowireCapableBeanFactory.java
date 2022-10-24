@@ -9,6 +9,7 @@ import com.vinspier.springframework.beans.factory.*;
 import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 import com.vinspier.springframework.beans.factory.config.BeanReference;
+import com.vinspier.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
 import com.vinspier.springframework.util.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -25,6 +26,11 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
     protected Object createBean(String beanName, BeanDefinition beanDefinition,Object[] args) {
         Object bean;
         try {
+            // *** 0、判断切面代理创建需要
+            bean = resolveBeforeBeanInstantiation(beanName,beanDefinition);
+            if (null != bean) {
+                return bean;
+            }
             // *** 1、创建实例
             bean = createBeanInstance(beanName,beanDefinition,args);
             // *** 2、填充属性
@@ -39,6 +45,17 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         // *** 注册到单例 存储缓存中
         if (beanDefinition.isSingleton()) {
             registrySingleton(beanName,bean);
+        }
+        return bean;
+    }
+
+    /**
+     * 处理实例化之前 是否需要代理工厂创建
+     * */
+    protected Object resolveBeforeBeanInstantiation(String beanName, BeanDefinition beanDefinition) {
+        Object bean = applyBeanPostProcessorBeforeInstantiation(beanDefinition.getBeanClass(),beanName);
+        if (bean != null) {
+            bean = applyBeanPostProcessorAfterInitialization(bean,beanName);
         }
         return bean;
     }
@@ -111,6 +128,23 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         wrappedBean = applyBeanPostProcessorAfterInitialization(wrappedBean,beanName);
         System.out.println("------------------> [" + beanName +"] bean initialize ending");
         return wrappedBean;
+    }
+
+    /**
+     * bean实例化前置增强
+     * */
+    protected Object applyBeanPostProcessorBeforeInstantiation(Class<?> clazz, String beanName) {
+        System.out.println("------------------> judge [" + clazz.getSimpleName() +"] class whether matches [aop pointcut definition] before bean Instantiation!");
+        Object resultBean;
+        for (BeanPostProcessor processor : getBeanPostProcessors()) {
+            if (processor instanceof InstantiationAwareBeanPostProcessor) {
+                resultBean = ((InstantiationAwareBeanPostProcessor) processor).postProcessBeforeInstantiation(clazz,beanName);
+                if (null != resultBean) {
+                    return resultBean;
+                }
+            }
+        }
+        return null;
     }
 
     /**

@@ -24,4 +24,20 @@
     <bean id="customizeBeanFactoryPostProcessor" name="customizeBeanFactoryPostProcessor" class="com.vinspier.springframework.beans.factory.config.CustomizeBeanFactoryPostProcessor"/>
     <bean id="customizeBeanPostProcessor" name="customizeBeanPostProcessor" class="com.vinspier.springframework.beans.factory.config.CustomizeBeanPostProcessor"/>
 
+
+    <!-- aop 增强配置 -->
+    <bean id="defaultAdvisorAutoProxyCreator" name="defaultAdvisorAutoProxyCreator" class="com.vinspier.springframework.aop.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="customizeBeforeAdvice" name="customizeBeforeAdvice" class="com.vinspier.biz.aop.CustomizeBeforeAdvice"/>
+
+    <bean id="methodBeforeAdviceInterceptor" name="methodBeforeAdviceInterceptor" class="com.vinspier.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="beforeAdvice" ref="customizeBeforeAdvice"/>
+    </bean>
+
+    <bean id="pointcutAdvisor" name="pointcutAdvisor" class="com.vinspier.springframework.aop.aspectj.AspectjExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* com.vinspier.biz.service.*.*(..))"/>
+        <property name="advice" ref="methodBeforeAdviceInterceptor"/>
+    </bean>
+    <!-- aop 增强配置 -->
+
 </beans>

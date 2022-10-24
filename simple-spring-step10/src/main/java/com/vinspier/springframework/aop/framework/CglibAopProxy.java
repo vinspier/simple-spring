@@ -31,7 +31,7 @@ public class CglibAopProxy implements AopProxy {
     }
 
     private static class DynamicAdvisedMethodInterceptor implements MethodInterceptor {
-        private AdvisedSupport advised;
+        private final AdvisedSupport advised;
 
         public DynamicAdvisedMethodInterceptor(AdvisedSupport advised) {
             this.advised = advised;
@@ -45,7 +45,7 @@ public class CglibAopProxy implements AopProxy {
                 // 进入切面 拦截增强
                 return advised.getMethodInterceptor().invoke(methodInvocation);
             }
-            // 不进入切面
+            // 不进入切面 直接执行目标方法
             return methodInvocation.proceed();
         }
 
@@ -53,7 +53,7 @@ public class CglibAopProxy implements AopProxy {
 
     private static class CglibMethodInvocation extends ReflectiveMethodInvocation {
 
-        private MethodProxy methodProxy;
+        private final MethodProxy methodProxy;
 
         public CglibMethodInvocation(Object target, Method method, Object[] args, MethodProxy methodProxy) {
             super(target, method, args);

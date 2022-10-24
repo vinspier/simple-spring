@@ -10,12 +10,12 @@ package com.vinspier.springframework.beans.factory.config;
 public interface BeanPostProcessor {
 
     /**
-     * bean 实例化 前置处理
+     * bean 初始化 前置处理
      * */
     Object postProcessBeforeInitialization(Object bean,String beanName);
 
     /**
-     * bean 实例化 前置处理
+     * bean 初始化 前置处理
      * */
     Object postProcessAfterInitialization(Object bean,String beanName);
 

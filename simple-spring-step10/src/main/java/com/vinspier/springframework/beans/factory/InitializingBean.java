@@ -14,7 +14,7 @@ public interface InitializingBean {
      * 1、在beanFactory对bean填充完原始属性之后
      * 2、在beanPostProcessor对初始化 前置增强之后
      * 3、在bean配置 自定义配置初始化方法之前
-     * 4、在beanPostProcessor对初始化 后置增强之钱
+     * 4、在beanPostProcessor对初始化 后置增强之前
      * */
     void afterPropertiesSet() throws Exception;
 
