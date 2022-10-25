@@ -50,17 +50,33 @@
 
 ---
 ### bean生命周期
-+ 1、实例初始化定义接口 InitializingBean
++ 0、工厂级别增强处理 BeanFactoryPostProcessor
+  + postProcessBeanFactory bean容器加载完配置后执行
 
-+ 2、实例销毁定义接口 DisposableBean
++ 1、提前于bean实例初始化BeanPostProcessor的子类
+  + 容器上下文增强处理 ApplicationContextAwareProcessor
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
+    + bean初始化前置处理 postProcessBeforeInstantiation
+
++ 2、各种通知处理Aware
+  + BeanFactory工厂通知 BeanFactoryAware
+  + bean加载器通知 BeanClassLoaderAware
+  + bean名称通知 BeanNameAware
+
++ 2、bean实例级别增强处理 BeanPostProcessor
+  + postProcessBeforeInitialization 前置
+  + postProcessAfterInitialization 后置
+
++ 3、实例初始化定义接口 InitializingBean
+  + afterPropertiesSet
+  + 1、在beanFactory对bean填充完原始属性之后
+  + 2、在beanPostProcessor对初始化 前置增强之后
+  + 3、在bean配置 自定义配置初始化方法之前
+  + 4、在beanPostProcessor对初始化 后置增强之前
+
++ 4、实例销毁定义接口 DisposableBean
   + 销毁接口适配累DisposableBeanAdapter
     + 兼容 未实现DisposableBean接口但定义了init-method的类
-    
-+ 3、BeanFactory工厂通知 BeanFactoryAware
-
-+ 4、bean加载器通知 BeanClassLoaderAware
-
-+ 5、bean名称通知 BeanNameAware
 
 ---
 ### 容器上下文Application
@@ -106,24 +122,4 @@
   + ApplicationContextCloseEvent
   + ApplicationContextRefreshEvent
 
----
-## 较上一个版本2.3 新增 spring容器 事件发布体系
-+ 1、增加 事件定义 ApplicationEvent
-  + 所有的事件必须继承抽象事件 ApplicationEvent
 
-+ 2、增加 事件发布定义 ApplicationEventPublisher
-  + AbstractApplicationContext 继承 AbstractApplicationContext 发布事件能力
-  
-+ 3、增加 事件监听定义 ApplicationListener
-  + 所有的事件监听必须实现 ApplicationListener
-
-+ 4、增加 事件监听发布处理中心枢纽 ApplicationEventMultiCater
-  + 内部/外部监听器存储容器 Set<ApplicationListener<? extends ApplicationEvent>> listeners
-  + 事件监听器注册入口 addApplicationListener addApplicationListeners
-  + 事件发布处理入口 multiCastEvent
-  + 核心处理中心 AbstractApplicationEventMultiCater
-
-+ 5、spring容器内部自带事件和监听器
-  + ApplicationContextEventListener
-  + ApplicationContextCloseEvent
-  + ApplicationContextRefreshEvent

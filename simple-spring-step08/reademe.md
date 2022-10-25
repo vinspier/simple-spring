@@ -48,19 +48,35 @@
   + 定义标签 XmlTagEnum
   + 增加解析 自定义初始化、销毁方法解析
 
+---
 ### bean生命周期
-+ 1、实例初始化定义接口 InitializingBean
++ 0、工厂级别增强处理 BeanFactoryPostProcessor
+  + postProcessBeanFactory bean容器加载完配置后执行
 
-+ 2、实例销毁定义接口 DisposableBean
++ 1、提前于bean实例初始化BeanPostProcessor的子类
+  + 容器上下文增强处理 ApplicationContextAwareProcessor
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
+    + bean初始化前置处理 postProcessBeforeInstantiation
+
++ 2、各种通知处理Aware
+  + BeanFactory工厂通知 BeanFactoryAware
+  + bean加载器通知 BeanClassLoaderAware
+  + bean名称通知 BeanNameAware
+
++ 2、bean实例级别增强处理 BeanPostProcessor
+  + postProcessBeforeInitialization 前置
+  + postProcessAfterInitialization 后置
+
++ 3、实例初始化定义接口 InitializingBean
+  + afterPropertiesSet
+  + 1、在beanFactory对bean填充完原始属性之后
+  + 2、在beanPostProcessor对初始化 前置增强之后
+  + 3、在bean配置 自定义配置初始化方法之前
+  + 4、在beanPostProcessor对初始化 后置增强之前
+
++ 4、实例销毁定义接口 DisposableBean
   + 销毁接口适配累DisposableBeanAdapter
     + 兼容 未实现DisposableBean接口但定义了init-method的类
-    
-+ 3、BeanFactory工厂通知 BeanFactoryAware
-
-+ 4、bean加载器通知 BeanClassLoaderAware
-
-+ 5、bean名称通知 BeanNameAware
-
 
 ### 容器上下文Application
 + 1、增加 系统上下文容器 ApplicationContext
