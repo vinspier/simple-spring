@@ -2,6 +2,9 @@ package com.vinspier.springframework.aop;
 
 import org.aopalliance.intercept.MethodInterceptor;
 
+import java.util.LinkedList;
+import java.util.List;
+
 /**
  * 面向切面动态代理的基础配置管理
  *
@@ -21,6 +24,9 @@ public class AdvisedSupport {
 
     // 方法规则校验器
     private MethodMatcher methodMatcher;
+
+    // todo 方法aop增强 供代理对象回调使用
+    private List<Advisor> advisors = new LinkedList<>();
 
     public AdvisedSupport() {
 
@@ -62,5 +68,17 @@ public class AdvisedSupport {
 
     public boolean isCglibProxyType() {
         return cglibProxyType;
+    }
+
+    public List<Advisor> getAdvisors() {
+        return advisors;
+    }
+
+    public void addAdvisor(Advisor advisor) {
+        this.advisors.add(advisor);
+    }
+
+    public void setAdvisors(List<Advisor> advisors) {
+        this.advisors = advisors;
     }
 }

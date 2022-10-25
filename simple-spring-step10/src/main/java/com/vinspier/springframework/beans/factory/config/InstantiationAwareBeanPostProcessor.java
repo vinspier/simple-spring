@@ -10,4 +10,11 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
      * */
     Object postProcessBeforeInstantiation(Class<?> beanClass,String beanName);
 
+    /**
+     * bean 初始化 后置处理
+     * */
+    default boolean postProcessAfterInstantiation(Object bean,String beanName) {
+        return true;
+    }
+
 }

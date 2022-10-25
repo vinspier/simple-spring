@@ -1,4 +1,4 @@
-# 基础版本spring容器 - version 3.0
+# 简易基础spring容器 - version 3.0
 ---
 ## 核心模型
 ---
