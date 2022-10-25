@@ -31,7 +31,7 @@ public class ReflectiveMethodInvocation implements MethodInvocation {
     }
 
     /**
-     * 放射机制 方法回调
+     * 反射机制 方法回调
      * */
     @Override
     public Object proceed() throws Throwable {

@@ -15,7 +15,7 @@ public interface BeanPostProcessor {
     Object postProcessBeforeInitialization(Object bean,String beanName);
 
     /**
-     * bean 初始化 前置处理
+     * bean 初始化 后置处理
      * */
     Object postProcessAfterInitialization(Object bean,String beanName);
 

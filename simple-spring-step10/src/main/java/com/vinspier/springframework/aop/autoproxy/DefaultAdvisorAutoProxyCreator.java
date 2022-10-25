@@ -11,7 +11,6 @@ import com.vinspier.springframework.beans.factory.support.DefaultListableBeanFac
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collection;
 
 /**

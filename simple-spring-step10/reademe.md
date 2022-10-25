@@ -1,4 +1,4 @@
-# 基础版本spring容器 - version 2.4
+# 基础版本spring容器 - version 3.0
 ---
 ## 核心模型
 ---
@@ -50,17 +50,34 @@
 
 ---
 ### bean生命周期
-+ 1、实例初始化定义接口 InitializingBean
++ 0、工厂级别增强处理 BeanFactoryPostProcessor
+  + postProcessBeanFactory bean容器加载完配置后执行
+  
++ 1、提前于bean实例初始化BeanPostProcessor的子类
+  + 容器上下文增强处理 ApplicationContextAwareProcessor
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
+    + bean初始化前置处理 postProcessBeforeInstantiation
+  
++ 2、各种通知处理Aware
+  + BeanFactory工厂通知 BeanFactoryAware
+  + bean加载器通知 BeanClassLoaderAware
+  + bean名称通知 BeanNameAware
+  
++ 2、bean实例级别增强处理 BeanPostProcessor
+  + postProcessBeforeInitialization 前置
+  + postProcessAfterInitialization 后置
+  
++ 3、实例初始化定义接口 InitializingBean
+  + afterPropertiesSet
+  + 1、在beanFactory对bean填充完原始属性之后
+  + 2、在beanPostProcessor对初始化 前置增强之后
+  + 3、在bean配置 自定义配置初始化方法之前
+  + 4、在beanPostProcessor对初始化 后置增强之前
 
-+ 2、实例销毁定义接口 DisposableBean
++ 4、实例销毁定义接口 DisposableBean
   + 销毁接口适配累DisposableBeanAdapter
     + 兼容 未实现DisposableBean接口但定义了init-method的类
     
-+ 3、BeanFactory工厂通知 BeanFactoryAware
-
-+ 4、bean加载器通知 BeanClassLoaderAware
-
-+ 5、bean名称通知 BeanNameAware
 
 ---
 ### 容器上下文Application
@@ -107,23 +124,40 @@
   + ApplicationContextRefreshEvent
 
 ---
-## 较上一个版本2.3 新增 spring容器 事件发布体系
-+ 1、增加 事件定义 ApplicationEvent
-  + 所有的事件必须继承抽象事件 ApplicationEvent
+## 较上一个版本3.0 新增 切面增强支持
++ 0、新增 bean生命周期环节 
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
 
-+ 2、增加 事件发布定义 ApplicationEventPublisher
-  + AbstractApplicationContext 继承 AbstractApplicationContext 发布事件能力
++ 1、切面切点规则定义 AspectjExpressionPointcut
+  + 类匹配 ClassFilter
+  + 方法匹配 MethodMatcher
+
++ 2、切点支持配置 AdvisedSupport
+  + 目标对象源 TargetSource
+  + 方法拦截器 MethodInterceptor
+    + 目标对象(代理工厂生产)执行目标方法时，会进入代理对象的invoke钩子函数，继而获取拦截器，进入拦截器逻辑（即切面）
+    + 在拦截器内部可增强方法(前置、后置、环绕等)
+  + 方法校验器 MethodMatcher
   
-+ 3、增加 事件监听定义 ApplicationListener
-  + 所有的事件监听必须实现 ApplicationListener
++ 3、代理对象生产工厂 AopProxy
+  + JDK动态代理 JdkDynamicAopProxy
+    + 实现调用处理器 InvocationHandler
+  + cglib动态代理 Enhancer生产
+    + 需要一个回调拦截 MethodInterceptor
 
-+ 4、增加 事件监听发布处理中心枢纽 ApplicationEventMultiCater
-  + 内部/外部监听器存储容器 Set<ApplicationListener<? extends ApplicationEvent>> listeners
-  + 事件监听器注册入口 addApplicationListener addApplicationListeners
-  + 事件发布处理入口 multiCastEvent
-  + 核心处理中心 AbstractApplicationEventMultiCater
++ 4、通知处理配置
+  + 通知配置器抽象 Advisor
+    + 获取通知类型 Advice
+      + 方法通知 MethodAdvice
+        + 前置增强方法通知 MethodBeforeAdvice
+  + 切面配置抽象 PointcutAdvisor
+    + 获取切面切点 pointcut
+  + 切点通知配置实现 AspectjExpressionPointcutAdvisor
+    + 切面切点配置 AspectjExpressionPointcut
+    + 通知行为配置 Advice
 
-+ 5、spring容器内部自带事件和监听器
-  + ApplicationContextEventListener
-  + ApplicationContextCloseEvent
-  + ApplicationContextRefreshEvent
++ 5、符合切面类的动态代理对象自动注入 DefaultAdvisorAutoProxyCreator 
+  + 实现bean工厂通知 BeanFactoryAware
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
+    + 创建bean实例前，获取切面定义，是否需要生成动态代理对象
+
