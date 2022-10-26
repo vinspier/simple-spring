@@ -20,6 +20,7 @@
         <module>simple-spring-step09</module>
         <module>simple-spring-step10</module>
         <module>simple-spring-step11</module>
+        <module>simple-spring-step12</module>
     </modules>
 
     <properties>
