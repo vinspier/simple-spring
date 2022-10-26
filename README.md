@@ -1,4 +1,4 @@
-# 基础版本spring容器 - version 3.1
+# 基础版本spring容器 - version 3.2
 ---
 ## 核心模型
 ---
@@ -18,9 +18,12 @@
 
 + 4、BeanFactory创建工厂
     + 顶层定义获取bean行为 BeanFactory
-      + 增加 指定参数 获取实例
+      + 增加 指定名称 获取bean实例
+      + 增加 指定名称、类型 获取bean实例
+      + 增加 指定类型 获取bean实例
     + 中间抽象层定义获取bean抽象获取-创建实现模版行为 AbstractBeanFactory
       + 增加bean实例增强配置 List<BeanPostProcessor> beanPostProcessors
+      + 属性配置值处理器 List<StringValueResolver> valueResolvers
     + 底层抽象层实现bean的创建流程 AbstractAutowireCapableBeanFactory
       + 增加 实例创建策略 InstantiationStrategy
         + jdk反射机制实现
@@ -123,11 +126,14 @@
   + ApplicationContextRefreshEvent
 
 ---
-### bean注解定义,包扫描
+### bean注解定义,包扫描，普通属性、bean属性xml配置/注解注入
 + 1、增加注册基础支持
   + bean标注 Component
   + bean使用范围 Scope
-
+  + bean注入注解(类型匹配) @Autowired
+  + bean名称修饰注解(搭配 @Autowired) @Qualifier
+  + 属性注入注解 @Value
+  
 + 2、xml读取解析 增加 包扫描支持
   + 增加解析 component-scan标签base-package属性
 
@@ -135,7 +141,19 @@
   + 扫描包下被注解的class文件 ClasspathScanningCandidateComponentProvider
   + 解析class属性 注册beanDefinition元数据定义 ClasspathBeanDefinitionScanner
 
-+ 4、增加 bean属性支持配置文件支持 PropertyPlaceholderConfigurer
++ 4、bean属性支持配置文件支持(***xml形式配置方式属性注入***) PropertyPlaceholderConfigurer
   + 属性配置规则 ${config_name}
   + 实现BeanFactoryPostProcessor,在beanFactory加载完bean定义后 处理属性配置替换beanDefinition的属性值
 
++ 5、配置文件属性配置解析器 StringValueResolver
+  + 解析使用@Value注解或者xml配置中 ${}占位符表达式 进行属性配置
+  + 在PropertyPlaceholderConfigurer读取配置资源文件，并注册 ***属性值解析起***
+  + 在AutowiredAnnotationBeanPostProcessor中 反射获取@Value修饰的属性 并解析回调解析器
+
++ 6、增加 注解式bean解析增强处理器 ***AutowiredAnnotationBeanPostProcessor***
+  + 继承自InstantiationAwareBeanPostProcessor ，增强bean初始化前
+    + ***postProcessPropertyValues*** 允许bean初始化之前修改属性
+  + 该处理器注册到bean容器时机: 在注解包扫描完类加载并注册完@Component @Service等修饰的类定义之后
+    ,在ClasspathBeanDefinitionScanner中提前注册该处理器
+  + ***resolveValueAnnotation*** 处理普通值属性注入
+  + ***resolveAutowiredAnnotation*** 处理bean属性注入
