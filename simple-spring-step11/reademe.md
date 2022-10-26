@@ -1,4 +1,4 @@
-# 基础版本spring容器 - version 3.1
+# 简易基础spring容器 - version 3.1
 ---
 ## 核心模型
 ---
@@ -52,21 +52,21 @@
 ### bean生命周期
 + 0、工厂级别增强处理 BeanFactoryPostProcessor
   + postProcessBeanFactory bean容器加载完配置后执行
-
+  
 + 1、提前于bean实例初始化BeanPostProcessor的子类
   + 容器上下文增强处理 ApplicationContextAwareProcessor
   + 实例化前置通知 InstantiationAwareBeanPostProcessor
     + bean初始化前置处理 postProcessBeforeInstantiation
-
+  
 + 2、各种通知处理Aware
   + BeanFactory工厂通知 BeanFactoryAware
   + bean加载器通知 BeanClassLoaderAware
   + bean名称通知 BeanNameAware
-
+  
 + 2、bean实例级别增强处理 BeanPostProcessor
   + postProcessBeforeInitialization 前置
   + postProcessAfterInitialization 后置
-
+  
 + 3、实例初始化定义接口 InitializingBean
   + afterPropertiesSet
   + 1、在beanFactory对bean填充完原始属性之后
@@ -77,6 +77,7 @@
 + 4、实例销毁定义接口 DisposableBean
   + 销毁接口适配累DisposableBeanAdapter
     + 兼容 未实现DisposableBean接口但定义了init-method的类
+    
 
 ---
 ### 容器上下文Application
@@ -124,6 +125,23 @@
 
 ---
 ### bean注解定义,包扫描
++ 1、增加注册基础支持
+  + bean标注 Component
+  + bean使用范围 Scope
+
++ 2、xml读取解析 增加 包扫描支持
+  + 增加解析 component-scan标签base-package属性
+
++ 3、增加注解bean读取解析
+  + 扫描包下被注解的class文件 ClasspathScanningCandidateComponentProvider
+  + 解析class属性 注册beanDefinition元数据定义 ClasspathBeanDefinitionScanner
+
++ 4、增加 bean属性支持配置文件支持 PropertyPlaceholderConfigurer
+  + 属性配置规则 ${config_name}
+  + 实现BeanFactoryPostProcessor,在beanFactory加载完bean定义后 处理属性配置替换beanDefinition的属性值
+
+---
+## 较上一个版本3.0 新增 包扫描bean注入 属性文件配置
 + 1、增加注册基础支持
   + bean标注 Component
   + bean使用范围 Scope
