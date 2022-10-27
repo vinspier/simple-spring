@@ -26,7 +26,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
      * 时机：在bean实例化之后 在bean统一填充beanDefinition属性之前
      * */
      default PropertyValues postProcessPropertyValues(PropertyValues pvs,Object bean,String beanName) {
-         return pvs;
+         return null;
      }
 
 }

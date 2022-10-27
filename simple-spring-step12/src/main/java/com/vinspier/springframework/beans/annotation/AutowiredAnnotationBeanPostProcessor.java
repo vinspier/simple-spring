@@ -42,7 +42,7 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
         // 2、处理bean注册式注入
         resolveValueAnnotation(declaredFields,bean);
         resolveAutowiredAnnotation(declaredFields,bean);
-        return pvs;
+        return null;
     }
 
     private void resolveValueAnnotation(Field[] declaredFields,Object bean) {
