@@ -1,4 +1,4 @@
-# 简易基础spring容器 - version 3.2
+# 简易基础spring容器 - version 3.3
 ---
 ## 核心模型
 ---
@@ -57,6 +57,8 @@
   + 容器上下文增强处理 ApplicationContextAwareProcessor
   + 实例化前置通知 InstantiationAwareBeanPostProcessor
     + bean初始化前置处理 postProcessBeforeInstantiation 
+      + 例如：切面切点 动态代理 (废弃)
+    + bean实例化后置增强方法 postProcessAfterInstantiation
       + 例如：切面切点 动态代理
     + bean初始化前置属性处理 postProcessPropertyValues
       + 例如：注解式注入属性
@@ -127,6 +129,43 @@
   + ApplicationContextRefreshEvent
 
 ---
+### AOP切面编程
++ 1、切面切点规则定义 AspectjExpressionPointcut
+  + 类匹配 ClassFilter
+  + 方法匹配 MethodMatcher
+
++ 2、切点支持配置 AdvisedSupport
+  + 目标对象源 TargetSource
+    + target目标对象本身可能已经是代理对象了 JDK/CGLIB
+    取决于 beanFactory工厂原始实例化的策略 InstantiationStrategy
+  + 方法拦截器 MethodInterceptor
+    + 目标对象(代理工厂生产)执行目标方法时，会进入代理对象的invoke钩子函数，继而获取拦截器，进入拦截器逻辑（即切面）
+    + 在拦截器内部可增强方法(前置、后置、环绕等)
+  + 方法校验器 MethodMatcher
+
++ 3、代理对象生产工厂 AopProxy
+  + JDK动态代理 JdkDynamicAopProxy
+    + 实现调用处理器 InvocationHandler
+  + cglib动态代理 Enhancer生产
+    + 需要一个回调拦截 MethodInterceptor
+
++ 4、通知处理配置
+  + 通知配置器抽象 Advisor
+    + 获取通知类型 Advice
+      + 方法通知 MethodAdvice
+        + 前置增强方法通知 MethodBeforeAdvice
+  + 切面配置抽象 PointcutAdvisor
+    + 获取切面切点 pointcut
+  + 切点通知配置实现 AspectjExpressionPointcutAdvisor
+    + 切面切点配置 AspectjExpressionPointcut
+    + 通知行为配置 Advice
+
++ 5、符合切面类的动态代理对象自动注入 DefaultAdvisorAutoProxyCreator
+  + 实现bean工厂通知 BeanFactoryAware
+  + 实例化前置通知 InstantiationAwareBeanPostProcessor
+    + 创建bean实例前，获取切面定义，是否需要生成动态代理对象
+
+---
 ### bean注解定义,包扫描
 + 1、增加注册基础支持
   + bean声明注解 @Component
@@ -144,25 +183,13 @@
   + 实现BeanFactoryPostProcessor,在beanFactory加载完bean定义后 处理属性配置替换beanDefinition的属性值
 
 ---
-## 较上一个版本3.1 新增 注解式注入bean 注入属性
-+ 1、增加 属性注解式注入基础支持
-  + bean注入注解(类型匹配) @Autowired
-  + bean名称修饰注解(搭配 @Autowired) @Qualifier
-  + 属性注入注解 @Value
+## 较上一个版本3.2 改动 bean属性填充 创建动态代理对象支持
++ 1、拓展bean通知行为 InstantiationAwareBeanPostProcessor
+  + 增加 实例化后置增强方法 postProcessAfterInstantiation
 
-+ 2、增加 配置文件属性配置解析器 StringValueResolver
-  + 解析使用@Value注解或者xml配置中 ${}占位符表达式 进行属性配置
-  + 在PropertyPlaceholderConfigurer读取配置资源文件，并注册 ***属性值解析起***
-  + 在AutowiredAnnotationBeanPostProcessor中 反射获取@Value修饰的属性 并解析回调解析器
++ 2、调整 切面动态代理对象创建时机 DefaultAdvisorAutoProxyCreator
+  + 从 postProcessBeforeInitialization 后置到实例初始化之后 postProcessAfterInitialization
 
-+ 3、增加 注解式bean解析增强处理器 ***AutowiredAnnotationBeanPostProcessor***
-  + 继承自InstantiationAwareBeanPostProcessor ，增强bean初始化前
-    + ***postProcessPropertyValues*** 允许bean初始化之前修改属性
-  + 该处理器注册到bean容器时机: 在注解包扫描完类加载并注册完@Component @Service等修饰的类定义之后
-  ,在ClasspathBeanDefinitionScanner中提前注册该处理器
-  + ***resolveValueAnnotation*** 处理普通值属性注入
-  + ***resolveAutowiredAnnotation*** 处理bean属性注入
-
-+ 4、bean工厂功能增强
-  + 增加 属性配置值处理器 List<StringValueResolver> valueResolvers
-  + 增加 通用类型获取bean实例 getBean(Class<T> type)
++ 3、修改 TargetSource获取目标对象的类型
+  + 原因: target目标对象本身可能已经是代理对象了 JDK/CGLIB
+  取决于 beanFactory工厂原始实例化的策略 InstantiationStrategy
