@@ -1,4 +1,4 @@
-# 简易基础spring容器 - version 3.3
+# 简易基础spring容器 - version 3.4
 ---
 ## 核心模型
 ---
@@ -183,13 +183,40 @@
   + 实现BeanFactoryPostProcessor,在beanFactory加载完bean定义后 处理属性配置替换beanDefinition的属性值
 
 ---
-## 较上一个版本3.2 改动 bean属性填充 创建动态代理对象支持
-+ 1、拓展bean通知行为 InstantiationAwareBeanPostProcessor
-  + 增加 实例化后置增强方法 postProcessAfterInstantiation
+### bean circle dependency
++ 1、三级缓存 存放不同时期bean实例 DefaultSingletonBeanRegistry
+  + 一级缓存 Map<String,Object> singletonBeansMap
+    + 存放完整的bean 属性都填充完毕 代理已经完成
+  + 二级缓存 Map<String,Object> earlySingletonBeansMap
+    + 存放 初始需要暴露被引用的bean 属性还未填充完毕 代理已经完成
+  + 三级缓存 Map<String,ObjectFactory<?>> singletonFactoriesMap
+    + 存放 bean的创建工厂
+    + ObjectFactory<T> 尤其是需要代理工厂创建的实例 会将spring内部实例化的实例进行代理返回代理对象
 
-+ 2、调整 切面动态代理对象创建时机 DefaultAdvisorAutoProxyCreator
-  + 从 postProcessBeforeInitialization 后置到实例初始化之后 postProcessAfterInitialization
++ 2、拓展 bean实例实例化通知处理器 InstantiationAwareBeanPostProcessor
+  + 增加 获取提前需要被暴露的bean 供其他bean引用 getEarlyBeanReference
 
-+ 3、修改 TargetSource获取目标对象的类型
-  + 原因: target目标对象本身可能已经是代理对象了 JDK/CGLIB
-  取决于 beanFactory工厂原始实例化的策略 InstantiationStrategy
++ 3、补充 bean创建实例流程 AbstractAutowireCapableBeanFactory
+  + 增加 bean循环依赖判断 提前将bean的创建行为存放到bean容器三级缓存中
+  + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
+  + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
+  
+---
+## 较上一个版本3.3 改动 解决bean的circle dependency
++ 1、三级缓存 存放不同时期bean实例 DefaultSingletonBeanRegistry
+  + 一级缓存 Map<String,Object> singletonBeansMap
+    + 存放完整的bean 属性都填充完毕 代理已经完成
+  + 二级缓存 Map<String,Object> earlySingletonBeansMap
+    + 存放 初始需要暴露被引用的bean 属性还未填充完毕 代理已经完成
+  + 三级缓存 Map<String,ObjectFactory<?>> singletonFactoriesMap
+    + 存放 bean的创建工厂
+    + ObjectFactory<T> 尤其是需要代理工厂创建的实例 会将spring内部实例化的实例进行代理返回代理对象
+
++ 2、拓展 bean实例实例化通知处理器 InstantiationAwareBeanPostProcessor
+  + 增加 获取提前需要被暴露的bean 供其他bean引用 getEarlyBeanReference
+
++ 3、补充 bean创建实例流程 AbstractAutowireCapableBeanFactory
+  + 增加 bean循环依赖判断 提前将bean的创建行为存放到bean容器三级缓存中
+  + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
+  + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
+  
