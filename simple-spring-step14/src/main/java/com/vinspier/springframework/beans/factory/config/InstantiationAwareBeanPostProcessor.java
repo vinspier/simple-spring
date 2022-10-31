@@ -22,6 +22,7 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
     }
 
     /**
+     * 获取提前需要被暴露的bean
      * 制定bean其他创建行为（代理创建）
      * */
     default Object getEarlyBeanReference(String beanName,Object originBean) {

@@ -11,6 +11,7 @@ import java.util.Set;
 
 /**
  * 单例行为抽象
+ * 单例的实例缓存容器
  * */
 public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
 

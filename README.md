@@ -194,3 +194,22 @@
     ,在ClasspathBeanDefinitionScanner中提前注册该处理器
   + ***resolveValueAnnotation*** 处理普通值属性注入
   + ***resolveAutowiredAnnotation*** 处理bean属性注入
+
+---
+### bean circle dependency
++ 1、三级缓存 存放不同时期bean实例 DefaultSingletonBeanRegistry
+  + 一级缓存 Map<String,Object> singletonBeansMap
+    + 存放完整的bean 属性都填充完毕 代理已经完成
+  + 二级缓存 Map<String,Object> earlySingletonBeansMap
+    + 存放 初始需要暴露被引用的bean 属性还未填充完毕 代理已经完成
+  + 三级缓存 Map<String,ObjectFactory<?>> singletonFactoriesMap
+    + 存放 bean的创建工厂
+    + ObjectFactory<T> 尤其是需要代理工厂创建的实例 会将spring内部实例化的实例进行代理返回代理对象
+
++ 2、拓展 bean实例实例化通知处理器 InstantiationAwareBeanPostProcessor
+  + 增加 获取提前需要被暴露的bean 供其他bean引用 getEarlyBeanReference
+
++ 3、补充 bean创建实例流程 AbstractAutowireCapableBeanFactory
+  + 增加 bean循环依赖判断 提前将bean的创建行为存放到bean容器三级缓存中
+  + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
+  + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
