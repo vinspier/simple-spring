@@ -23,19 +23,31 @@ import java.util.List;
  * */
 public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFactory {
 
-    private InstantiationStrategy instantiationStrategy = new CglibInstantiationStrategy();
+    private InstantiationStrategy instantiationStrategy = new JdkInstantiationStrategy();
 
     @Override
     protected Object createBean(String beanName, BeanDefinition beanDefinition,Object[] args) {
+        // *** 判断 bean创建是否由外部指定创建
+        Object bean = resolveBeforeBeanInstantiation(beanName,beanDefinition);
+        if (null != bean) {
+            return bean;
+        }
+        return doCreateBean(beanName,beanDefinition,args);
+    }
+
+    /**
+     * spring内部创建bean实例流程
+     * */
+    protected Object doCreateBean(String beanName, BeanDefinition beanDefinition,Object[] args) {
         Object bean;
         try {
-            // *** 0、判断切面代理创建需要
-            bean = resolveBeforeBeanInstantiation(beanName,beanDefinition);
-            if (null != bean) {
-                return bean;
-            }
             // *** 1、创建实例
             bean = createBeanInstance(beanName,beanDefinition,args);
+            // *** 1.1 处理循环依赖
+            if (beanDefinition.isSingleton()) {
+                Object exposedBean = bean;
+                registrySingletonFactory(beanName,() -> getEarlyBeanReference(beanName,beanDefinition,exposedBean));
+            }
             // *** 1.3 bean实例创建后 执行实例化后置增强
             boolean continuePropertyPopulation = applyBeanPostProcessorAfterInstantiation(beanName,bean,beanDefinition);
             if (!continuePropertyPopulation) {
@@ -53,11 +65,14 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
         }
         // *** 注册实现了DisposableBean的实例
         registryDisposableBeanIfNecessary(beanName,bean,beanDefinition);
+        Object determinedBean = bean;
         // *** 注册到单例 存储缓存中
         if (beanDefinition.isSingleton()) {
-            registrySingleton(beanName,bean);
+            // 从beanFactory多级缓存中获取最终的bean实例（可能为代理对象）
+            determinedBean = getSingleton(beanName);
+            registrySingleton(beanName,determinedBean);
         }
-        return bean;
+        return determinedBean;
     }
 
     /**
@@ -89,6 +104,29 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             }
         }
         return instantiationStrategy.instantiate(beanDefinition,beanName,constructor,args);
+    }
+
+    /**
+     * 指定最终的实例创建
+     * 结果：无需代理 返回 originBean
+     * 需代理 返回 代理对象
+     * */
+    protected Object getEarlyBeanReference(String beanName, BeanDefinition beanDefinition,Object originBean) {
+        Object exposedBean = originBean;
+        List<BeanPostProcessor> processors = getBeanPostProcessors();
+        if (CollectionUtil.isEmpty(processors)) {
+            return exposedBean;
+        }
+        for (BeanPostProcessor processor : processors) {
+            if (processor instanceof InstantiationAwareBeanPostProcessor) {
+                // *** bean实例化 后置增强
+                exposedBean = ((InstantiationAwareBeanPostProcessor)processor).getEarlyBeanReference(beanName,exposedBean);
+                if (null != exposedBean) {
+                    return exposedBean;
+                }
+            }
+        }
+        return exposedBean;
     }
 
     /**

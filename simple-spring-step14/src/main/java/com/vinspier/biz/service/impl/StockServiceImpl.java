@@ -1,6 +1,7 @@
 package com.vinspier.biz.service.impl;
 
 import com.vinspier.biz.dao.StockDao;
+import com.vinspier.biz.service.SpuService;
 import com.vinspier.biz.service.StockService;
 import com.vinspier.springframework.beans.annotation.Autowired;
 import com.vinspier.springframework.beans.annotation.Qualifier;
@@ -27,6 +28,10 @@ public class StockServiceImpl implements StockService, BeanFactoryAware, BeanCla
 
     @Value("${warehouse.code}")
     private String warehouse;
+
+    @Autowired
+    @Qualifier("spuService")
+    private SpuService spuService;
 
     @Override
     public Long getStock(Long skuId) {
@@ -71,6 +76,10 @@ public class StockServiceImpl implements StockService, BeanFactoryAware, BeanCla
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         System.out.println("------------------------> [执行applicationContext回调通知]");
         this.applicationContext = applicationContext;
+    }
+
+    public void printSpuService(){
+        System.out.printf("代理对象spuService %s%n",spuService);
     }
 
     public ApplicationContext getApplicationContext() {

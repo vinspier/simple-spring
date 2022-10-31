@@ -24,4 +24,15 @@ public class ClasspathApplicationContextTest {
         System.out.println(stockService.getWarehouse());
     }
 
+
+    @Test
+    public void testCircleDependency() {
+        String configLocation = "classpath:spring-scan-annotation.xml";
+        ClasspathApplicationContext applicationContext = new ClasspathApplicationContext(configLocation);
+        StockService stockService = applicationContext.getBean("stockServiceImpl", StockServiceImpl.class);
+        SpuService spuService = applicationContext.getBean("spuService", SpuServiceImpl.class);
+        stockService.printSpuService();
+        spuService.printStockService();
+    }
+
 }

@@ -12,6 +12,9 @@ import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * 符合切面的对象 代理工厂会代理出一个对象
@@ -23,6 +26,8 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
 
     private DefaultListableBeanFactory beanFactory;
 
+    private Set<Object> earlyProxyReferences = Collections.synchronizedSet(new HashSet<>());
+
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
         return bean;
@@ -33,6 +38,24 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
      * */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) {
+        if (earlyProxyReferences.contains(beanName)) {
+            return bean;
+        }
+        return doProxyIfNecessary(beanName,bean);
+    }
+
+    @Override
+    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
+        return null;
+    }
+
+    @Override
+    public Object getEarlyBeanReference(String beanName, Object originBean) {
+        earlyProxyReferences.add(beanName);
+        return doProxyIfNecessary(beanName,originBean);
+    }
+
+    protected Object doProxyIfNecessary(String beanName, Object bean) {
         Class<?> clazz = bean.getClass();
         if (isInfrastructureClass(clazz)) {
             return bean;
@@ -53,14 +76,6 @@ public class DefaultAdvisorAutoProxyCreator implements InstantiationAwareBeanPos
             return ProxyFactory.proxy(advisedSupport);
         }
         return bean;
-    }
-
-    /**
-     * 为符合进入切面的类 生成代理对象
-     * */
-    @Override
-    public Object postProcessBeforeInstantiation(Class<?> beanClass, String beanName) {
-        return null;
     }
 
     private boolean isInfrastructureClass(Class<?> clazz) {

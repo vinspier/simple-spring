@@ -8,4 +8,6 @@ public interface StockService {
 
     void setWarehouse(String warehouse);
 
+    void printSpuService();
+
 }

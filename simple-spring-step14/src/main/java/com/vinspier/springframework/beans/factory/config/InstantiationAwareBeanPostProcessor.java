@@ -22,6 +22,13 @@ public interface InstantiationAwareBeanPostProcessor extends BeanPostProcessor {
     }
 
     /**
+     * 制定bean其他创建行为（代理创建）
+     * */
+    default Object getEarlyBeanReference(String beanName,Object originBean) {
+        return originBean;
+    }
+
+    /**
      * 处理属性的注解式注入
      * @Autowired @Qualifier @Value
      * 时机：在bean实例化之后 在bean统一填充beanDefinition属性之前

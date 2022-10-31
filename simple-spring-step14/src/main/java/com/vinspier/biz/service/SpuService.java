@@ -4,4 +4,5 @@ public interface SpuService {
 
     String getSpuName();
 
+    void printStockService();
 }
