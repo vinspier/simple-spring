@@ -35,4 +35,13 @@ public class ClasspathApplicationContextTest {
         spuService.printStockService();
     }
 
+    @Test
+    public void testPropValueConverter() {
+        String configLocation = "classpath:spring-scan-annotation.xml";
+        ClasspathApplicationContext applicationContext = new ClasspathApplicationContext(configLocation);
+        SpuService spuService = applicationContext.getBean("spuService", SpuServiceImpl.class);
+        spuService.printStockService();
+        System.out.println(spuService.getDate());
+    }
+
 }

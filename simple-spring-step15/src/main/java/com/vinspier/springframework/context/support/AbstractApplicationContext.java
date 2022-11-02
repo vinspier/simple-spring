@@ -2,11 +2,13 @@ package com.vinspier.springframework.context.support;
 
 import com.vinspier.springframework.beans.factory.config.BeanFactoryPostProcessor;
 import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
+import com.vinspier.springframework.beans.factory.config.ConfigurableBeanFactory;
 import com.vinspier.springframework.beans.factory.support.ConfigurableListableBeanFactory;
 import com.vinspier.springframework.context.ApplicationEvent;
 import com.vinspier.springframework.context.ApplicationListener;
 import com.vinspier.springframework.context.ConfigurableApplicationContext;
 import com.vinspier.springframework.context.event.*;
+import com.vinspier.springframework.core.convert.ConversionService;
 import com.vinspier.springframework.core.io.AbstractResourceLoader;
 
 import java.util.Collection;
@@ -42,8 +44,9 @@ public abstract class AbstractApplicationContext extends AbstractResourceLoader 
         initApplicationEventMultiCater();
         // 7、注册 事件监听器
         registerApplicationListeners();
-        // 8、提前实例化bean单例
-        beanFactory.preInstantiateSingletons();
+        // 8、注册属性转换器 提前实例化bean单例
+        finishedBeanFactoryInitialization(beanFactory);
+//        beanFactory.preInstantiateSingletons();
         // 9、发布容器刷新成功
         refreshFinished();
     }
@@ -95,6 +98,18 @@ public abstract class AbstractApplicationContext extends AbstractResourceLoader 
         }
     }
 
+    protected void finishedBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
+        // 注册属性转换器
+        if (beanFactory.containsBean("conversionService")) {
+            Object conversionService = beanFactory.getBean("conversionService");
+            if (conversionService instanceof ConversionService) {
+                beanFactory.setConvertService((ConversionService) conversionService);
+            }
+        }
+        // 提前实例化bean单例
+        beanFactory.preInstantiateSingletons();
+    }
+
     protected void refreshFinished() {
         this.publishRefreshFinishedEvent();
     }
@@ -137,6 +152,11 @@ public abstract class AbstractApplicationContext extends AbstractResourceLoader 
     @Override
     public Set<String> getBeanDefinitionNames() {
         return getBeanFactory().getBeanDefinitionNames();
+    }
+
+    @Override
+    public boolean containsBean(String name) {
+        return getBeanFactory().containsBean(name);
     }
 
     @Override

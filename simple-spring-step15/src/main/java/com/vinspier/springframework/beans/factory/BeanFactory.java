@@ -26,4 +26,9 @@ public interface BeanFactory {
      * */
     <T> T getBean(Class<T> type);
 
+    /**
+     * 是否存在bean
+     * */
+    boolean containsBean(String name);
+
 }

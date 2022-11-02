@@ -2,6 +2,7 @@ package com.vinspier.springframework.beans.factory.support;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.TypeUtil;
 import com.vinspier.springframework.beans.PropertyValue;
 import com.vinspier.springframework.beans.PropertyValues;
 import com.vinspier.springframework.beans.annotation.AutowiredAnnotationBeanPostProcessor;
@@ -12,6 +13,7 @@ import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 import com.vinspier.springframework.beans.factory.config.BeanReference;
 import com.vinspier.springframework.beans.factory.config.InstantiationAwareBeanPostProcessor;
+import com.vinspier.springframework.core.convert.ConversionService;
 import com.vinspier.springframework.util.StringUtils;
 
 import java.lang.reflect.Constructor;
@@ -184,6 +186,16 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
             if (value instanceof BeanReference) {
                 BeanReference beanReference = (BeanReference) value;
                 value = getBean(beanReference.getBeanName());
+            } else {
+                // 属性类型转换处理
+                ConversionService conversionService = super.getConvertService();
+                if (null != conversionService) {
+                   Class<?> sourceType = value.getClass();
+                   Class<?> targetType = (Class<?>) TypeUtil.getFieldType(bean.getClass(),name);
+                   if (conversionService.canConvert(sourceType,targetType)) {
+                       value = conversionService.convert(value,targetType);
+                   }
+                }
             }
             if (null == value) {
                 throw new PropertyException("no property value found for property name: " + name + " ,in bean: " + beanName);

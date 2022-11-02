@@ -5,6 +5,7 @@ import com.vinspier.springframework.beans.factory.FactoryBean;
 import com.vinspier.springframework.beans.factory.config.BeanPostProcessor;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 import com.vinspier.springframework.beans.factory.config.ConfigurableBeanFactory;
+import com.vinspier.springframework.core.convert.ConversionService;
 import com.vinspier.springframework.util.StringUtils;
 import com.vinspier.springframework.util.StringValueResolver;
 
@@ -27,6 +28,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
      * */
     private final List<StringValueResolver> valueResolvers = new LinkedList<>();
 
+    /**
+     * 属性转换器
+     * */
+    private ConversionService conversionService;
+
     @Override
     public Object getBean(String beanName) {
         return getBean(beanName, (Object) null);
@@ -41,6 +47,13 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
     public <T> T getBean(String name, Class<T> requiredType) {
         return doGetBean(name,null,requiredType);
     }
+
+    @Override
+    public boolean containsBean(String name) {
+        return containsBeanDefinition(name);
+    }
+
+    protected abstract boolean containsBeanDefinition(String name);
 
     /**
      * 定义 实例创建 抽象流程
@@ -113,5 +126,15 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             }
         }
         return null;
+    }
+
+    @Override
+    public void setConvertService(ConversionService conversionService) {
+        this.conversionService = conversionService;
+    }
+
+    @Override
+    public ConversionService getConvertService() {
+        return this.conversionService;
     }
 }

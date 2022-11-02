@@ -1,6 +1,8 @@
 package com.vinspier.springframework.beans.factory.config;
 
+import com.sun.istack.internal.Nullable;
 import com.vinspier.springframework.beans.factory.HierarchicalBeanFactory;
+import com.vinspier.springframework.core.convert.ConversionService;
 import com.vinspier.springframework.util.StringValueResolver;
 
 /**
@@ -34,4 +36,15 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
      * 处理属性值表达式 获取配置值
      * */
     String resolveEmbeddedValue(String valueExpression);
+
+    /**
+     * 设置属性转换器
+     * */
+    void setConvertService(ConversionService conversionService);
+
+    /**
+     * 获取属性转换器
+     * */
+    @Nullable
+    ConversionService getConvertService();
 }
