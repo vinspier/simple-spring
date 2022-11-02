@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	         http://www.springframework.org/schema/beans/spring-beans.xsd
+		 http://www.springframework.org/schema/context">
+
+    <bean id="stockDao" name="stockDao" init-method="customizeInitMethod" destroy-method="customizeDestroyMethod" class="com.vinspier.biz.dao.impl.StockDaoImpl">
+
+    </bean>
+
+
+    <bean id="stockService" name="stockService" class="com.vinspier.biz.service.impl.StockServiceImpl">
+        <property name="stockDao" ref="stockDao"/>
+        <property name="warehouse" value="${warehouse.code}"/>
+    </bean>
+
+    <bean id="propertyPlaceholderConfigurer" name="PropertyPlaceholderConfigurer" class="com.vinspier.springframework.beans.factory.PropertyPlaceholderConfigurer">
+        <property name="propertyLocation" value="classpath:biz.properties"/>
+    </bean>
+
+    <!-- aop 增强配置 -->
+
+    <!-- component-scan configuration -->
+    <context:component-scan base-package="com.vinspier.biz.dao.impl,com.vinspier.biz.service.impl"/>
+
+</beans>

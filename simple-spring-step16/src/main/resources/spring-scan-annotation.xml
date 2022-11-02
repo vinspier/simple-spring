@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	         http://www.springframework.org/schema/beans/spring-beans.xsd
+		 http://www.springframework.org/schema/context">
+
+    <bean id="propertyPlaceholderConfigurer" name="PropertyPlaceholderConfigurer" class="com.vinspier.springframework.beans.factory.PropertyPlaceholderConfigurer">
+        <property name="propertyLocation" value="classpath:biz.properties"/>
+    </bean>
+
+    <!-- aop 增强配置 -->
+    <bean id="defaultAdvisorAutoProxyCreator" name="defaultAdvisorAutoProxyCreator" class="com.vinspier.springframework.aop.autoproxy.DefaultAdvisorAutoProxyCreator"/>
+
+    <bean id="customizeBeforeAdvice" name="customizeBeforeAdvice" class="com.vinspier.biz.aop.CustomizeBeforeAdvice"/>
+
+    <bean id="methodBeforeAdviceInterceptor" name="methodBeforeAdviceInterceptor" class="com.vinspier.springframework.aop.framework.adapter.MethodBeforeAdviceInterceptor">
+        <property name="beforeAdvice" ref="customizeBeforeAdvice"/>
+    </bean>
+
+    <bean id="pointcutAdvisor" name="pointcutAdvisor" class="com.vinspier.springframework.aop.aspectj.AspectjExpressionPointcutAdvisor">
+        <property name="expression" value="execution(* com.vinspier.biz.service.*.*(..))"/>
+        <property name="advice" ref="methodBeforeAdviceInterceptor"/>
+    </bean>
+    <!-- aop 增强配置 -->
+
+    <!-- component-scan configuration -->
+    <context:component-scan base-package="com.vinspier.biz.dao.impl,com.vinspier.biz.service.impl,com.vinspier.biz.config"/>
+
+</beans>
