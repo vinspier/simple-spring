@@ -3,7 +3,7 @@ package com.vinspier.springframework.core.convert.converter;
 import java.util.Set;
 
 /**
- * 通用转换
+ * 通用转换配置
  *
  * @author  xiaobiao.fan
  * @date    2022/11/1 6:23 下午

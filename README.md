@@ -213,3 +213,32 @@
   + 增加 bean循环依赖判断 提前将bean的创建行为存放到bean容器三级缓存中
   + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
   + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
+___
+### 属性类型转换服务
++ 1、转换器 Converter
+  + 框架内置 [字符串-> 数字] 转换器 StringToNumberConverter
+    + 可通过 StringToNumberConverterFactory工厂创建
+  + 程序外置 [字符串-> 日期] 转换器 StringToLocalDateConverter
+    + 通过配置 转换服务工厂Bean注入 ConversionServiceFactoryBean
+
++ 2、转转器生成工厂 ConverterFactory
+  + 框架内置 [字符串-> 数字] 转换器工厂 StringToNumberConverterFactory
+
++ 3、通用转化器配置管理 GenericConverter
+  + 转换类型配置项 ConvertiblePair
+    + sourceType <-> targetType
+  + 定义获取转换器可支持转换类型集 getConvertiblePairTypes
+  + 定义转换通用行为 convert
+
++ 4、转换器注册器 ConverterRegistry
+  + 定义注册行为
+  + 注册 具体转换器、通用转换器适配、转换器生成工厂
+
++ 5、转换器服务中心 ConversionService
+  + 顶层设计 转换行为定义 canConvert、convert
+  + 通用服务实现 GenericConversionService
+    + 转换类型配置与转换器配置 Map<GenericConverter.ConvertiblePair,GenericConverter> converters
+    + 实现 转化器注册器行为
+    + 实现 转换服务 具体转换行为
+    + ***定义转换器适配器*** ConverterAdapter
+    + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter

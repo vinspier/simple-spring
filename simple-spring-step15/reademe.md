@@ -201,22 +201,69 @@
   + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
   + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
   
+___
+### 属性类型转换服务
++ 1、转换器 Converter
+  + 框架内置 [字符串-> 数字] 转换器 StringToNumberConverter
+    + 可通过 StringToNumberConverterFactory工厂创建
+  + 程序外置 [字符串-> 日期] 转换器 StringToLocalDateConverter
+    + 通过配置 转换服务工厂Bean注入 ConversionServiceFactoryBean
+
++ 2、转转器生成工厂 ConverterFactory
+  + 框架内置 [字符串-> 数字] 转换器工厂 StringToNumberConverterFactory
+
++ 3、通用转化器配置管理 GenericConverter
+  + 转换类型配置项 ConvertiblePair
+    + sourceType <-> targetType
+  + 定义获取转换器可支持转换类型集 getConvertiblePairTypes
+  + 定义转换通用行为 convert
+
++ 4、转换器注册器 ConverterRegistry
+  + 定义注册行为
+  + 注册 具体转换器、通用转换器适配、转换器生成工厂
+
++ 5、转换器服务中心 ConversionService
+  + 顶层设计 转换行为定义 canConvert、convert
+  + 通用服务实现 GenericConversionService
+    + 转换类型配置与转换器配置 Map<GenericConverter.ConvertiblePair,GenericConverter> converters
+    + 实现 转化器注册器行为
+    + 实现 转换服务 具体转换行为
+    + ***定义转换器适配器*** ConverterAdapter
+    + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter
 ---
-## 较上一个版本3.3 改动 解决bean的circle dependency
-+ 1、三级缓存 存放不同时期bean实例 DefaultSingletonBeanRegistry
-  + 一级缓存 Map<String,Object> singletonBeansMap
-    + 存放完整的bean 属性都填充完毕 代理已经完成
-  + 二级缓存 Map<String,Object> earlySingletonBeansMap
-    + 存放 初始需要暴露被引用的bean 属性还未填充完毕 代理已经完成
-  + 三级缓存 Map<String,ObjectFactory<?>> singletonFactoriesMap
-    + 存放 bean的创建工厂
-    + ObjectFactory<T> 尤其是需要代理工厂创建的实例 会将spring内部实例化的实例进行代理返回代理对象
+## 较上一个版本3.4 改动 增加属性类型转换器支持
++ 1、转换器 Converter
+  + 框架内置 [字符串-> 数字] 转换器 StringToNumberConverter
+    + 可通过 StringToNumberConverterFactory工厂创建
+  + 程序外置 [字符串-> 日期] 转换器 StringToLocalDateConverter
+    + 通过配置 转换服务工厂Bean注入 ConversionServiceFactoryBean
 
-+ 2、拓展 bean实例实例化通知处理器 InstantiationAwareBeanPostProcessor
-  + 增加 获取提前需要被暴露的bean 供其他bean引用 getEarlyBeanReference
++ 2、转转器生成工厂 ConverterFactory
+  + 框架内置 [字符串-> 数字] 转换器工厂 StringToNumberConverterFactory
 
-+ 3、补充 bean创建实例流程 AbstractAutowireCapableBeanFactory
-  + 增加 bean循环依赖判断 提前将bean的创建行为存放到bean容器三级缓存中
-  + 增加 注册单例前的自身完整性判断 提前通过 getSingleton 判断
-  + getSingleton 从一级到三级缓存逐级寻找 直到创建完成
++ 3、通用转化器配置管理 GenericConverter
+  + 转换类型配置项 ConvertiblePair
+    + sourceType <-> targetType
+  + 定义获取转换器可支持转换类型集 getConvertiblePairTypes
+  + 定义转换通用行为 convert
   
++ 4、转换器注册器 ConverterRegistry
+  + 定义注册行为
+  + 注册 具体转换器、通用转换器适配、转换器生成工厂
+
++ 5、转换器服务中心 ConversionService
+  + 顶层设计 转换行为定义 canConvert、convert
+  + 通用服务实现 GenericConversionService
+    + 转换类型配置与转换器配置 Map<GenericConverter.ConvertiblePair,GenericConverter> converters
+    + 实现 转化器注册器行为
+    + 实现 转换服务 具体转换行为
+    + ***定义转换器适配器*** ConverterAdapter
+    + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter
+
++ 6、增加 转换器服务注册和属性处理逻辑
+  + 1、在加载bean配置完毕后，先判断是否需要注册转换器，再提前初始化单例
+    + AbstractApplicationContext -> refresh -> finishedBeanFactoryInitialization
+  + 2、bean容器处理化bean实例之前 处理属性配置
+    + applyBeanPostProcessorBeforeApplyingBeanPropertyValues
+      + AutowiredAnnotationBeanPostProcessor -> postProcessPropertyValues
+    + applyBeanPropertyValues
