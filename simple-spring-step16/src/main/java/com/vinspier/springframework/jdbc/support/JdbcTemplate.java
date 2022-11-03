@@ -1,15 +1,17 @@
 package com.vinspier.springframework.jdbc.support;
 
 import com.vinspier.springframework.jdbc.UncategorizedSQLException;
-import com.vinspier.springframework.jdbc.core.JdbcOperations;
-import com.vinspier.springframework.jdbc.core.SqlProvider;
-import com.vinspier.springframework.jdbc.core.StatementCallback;
+import com.vinspier.springframework.jdbc.core.*;
 import com.vinspier.springframework.jdbc.datasource.DatasourceUtils;
+import com.vinspier.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Map;
 
 /**
  * jdbc操作模版
@@ -27,12 +29,11 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     private int queryTimeout = -1;
 
     public JdbcTemplate() {
-
     }
 
     public JdbcTemplate(DataSource dataSource) {
-        super.setDataSource(dataSource);
-        super.afterPropertiesSet();
+        setDataSource(dataSource);
+        afterPropertiesSet();
     }
 
     @Override
@@ -75,6 +76,54 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
                 JdbcUtils.closeStatement(statement);
             }
         }
+    }
+
+    @Override
+    public <T> List<T> query(String sql, RowMapper<T> rowMapper) {
+        return result(query(sql,new RowMapperResultSetExtractor<T>(rowMapper)));
+    }
+
+    @Override
+    public <T> T query(String sql, ResultSetExtractor<T> extractor) {
+        if (StringUtils.isEmpty(sql)) {
+            throw new IllegalArgumentException("query sql statement must not be empty!");
+        }
+        if (null == extractor) {
+            throw new IllegalArgumentException("result set extractor must not be null!");
+        }
+        class QueryStatementCallback implements StatementCallback<T>,SqlProvider {
+            @Override
+            public String getSql() {
+                return sql;
+            }
+
+            @Override
+            public T doInStatement(Statement statement) throws SQLException {
+                ResultSet rs = statement.executeQuery(sql);
+                return extractor.extractData(rs);
+            }
+        }
+        return execute(new QueryStatementCallback(),true);
+    }
+
+    @Override
+    public List<Map<String, Object>> queryForList(String sql) {
+        return query(sql,getColumnRowMapper());
+    }
+
+    /**
+     * 数据结果的处理 没有查询到数据时 应当返回一个空数据
+     * 空数组、空列表、空map、空set......
+     */
+    protected <T> T result(T result) {
+        if (null == result) {
+            throw new IllegalStateException("illegal execute result state: there is no result returned!");
+        }
+        return result;
+    }
+
+    protected RowMapper<Map<String,Object>> getColumnRowMapper() {
+        return new ColumnRowMapper();
     }
 
     /**
