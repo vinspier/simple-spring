@@ -1,12 +1,12 @@
 package com.vinspier.springframework.beans.factory.xml;
 
-import cn.hutool.core.util.XmlUtil;
+import cn.hutool.core.util.StrUtil;
 import com.vinspier.springframework.beans.PropertyValue;
 import com.vinspier.springframework.beans.exception.BeansException;
-import com.vinspier.springframework.beans.factory.support.AbstractBeanDefinitionReader;
-import com.vinspier.springframework.beans.factory.support.BeanDefinitionRegistry;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 import com.vinspier.springframework.beans.factory.config.BeanReference;
+import com.vinspier.springframework.beans.factory.support.AbstractBeanDefinitionReader;
+import com.vinspier.springframework.beans.factory.support.BeanDefinitionRegistry;
 import com.vinspier.springframework.context.annotation.ClasspathBeanDefinitionScanner;
 import com.vinspier.springframework.core.io.Resource;
 import com.vinspier.springframework.core.io.ResourceLoader;
@@ -117,8 +117,8 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
         Class<?> beanClazz = Class.forName(className);
         // bean名称
         String beanName = StringUtils.isNotEmpty(id) ? id : name;
-        if (StringUtils.isEmpty(name)) {
-            beanName = beanClazz.getSimpleName();
+        if (StringUtils.isEmpty(beanName)) {
+            beanName = StrUtil.lowerFirst(beanClazz.getSimpleName());
         }
         BeanDefinition beanDefinition = new BeanDefinition(beanClazz);
         beanDefinition.setInitMethodName(initMethodName);
