@@ -61,9 +61,12 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
     public <T> T getBean(Class<T> type) {
         List<String> beanNames = new LinkedList<>();
         beanDefinitionMap.forEach((k,v) -> {
-            if (type.isAssignableFrom(v.getBeanClass())) {
+            if (validClassTypeAssignable(v.getBeanClass(),type)) {
                 beanNames.add(k);
             }
+//            if (type.isAssignableFrom(v.getBeanClass())) {
+//                beanNames.add(k);
+//            }
         });
         if (beanNames.size() != 1) {
             throw new BeansException(String.format("class named %s expected single bean but found more than one",type.getSimpleName()));

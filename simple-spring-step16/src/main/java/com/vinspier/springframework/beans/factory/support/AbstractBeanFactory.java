@@ -45,7 +45,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Override
     public <T> T getBean(String name, Class<T> requiredType) {
-        return doGetBean(name,null,requiredType);
+        // tips: 由于 容器中的bean可能为代理对象 所以不能直接转成requiredType
+        // tips: requiredType 应在获取bean之前 与beanDefinition中的原始类型比较
+        return doGetBean(name,null,null);
     }
 
     @Override
@@ -64,7 +66,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
             return getObjectForBeanInstance(result,beanName);
         }
         BeanDefinition beanDefinition = getBeanDefinition(beanName);
-        this.validBeanClassType(beanDefinition.getBeanClass(),requiredType);
+//        this.validBeanClassType(beanDefinition.getBeanClass(),requiredType);
         result = createBean(beanName,beanDefinition,args);
         return getObjectForBeanInstance(result,beanName);
     }
@@ -91,6 +93,10 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
         if (null != requiredType && !bean.getClass().isAssignableFrom(requiredType)) {
             throw new BeansException("could not found bean required of type " + requiredType.getSimpleName());
         }
+    }
+
+    protected <T> boolean validClassTypeAssignable(Class<?> beanClazz,Class<T> requiredType) {
+        return null != requiredType && requiredType.isAssignableFrom(beanClazz);
     }
 
     protected abstract BeanDefinition getBeanDefinition(String beanName);
