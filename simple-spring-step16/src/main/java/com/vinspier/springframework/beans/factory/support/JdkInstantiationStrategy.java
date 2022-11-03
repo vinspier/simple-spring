@@ -18,7 +18,7 @@ public class JdkInstantiationStrategy implements InstantiationStrategy {
                 instance = clazz.getDeclaredConstructor().newInstance();
             }
         } catch (Exception e) {
-            throw new BeansException("initiate bean failed for bean name: " + beanName);
+            throw new BeansException("initiate bean failed for bean name: " + beanName,e);
         }
 
         return (T) instance;

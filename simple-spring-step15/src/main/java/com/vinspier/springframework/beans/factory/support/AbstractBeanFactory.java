@@ -35,7 +35,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 
     @Override
     public Object getBean(String beanName) {
-        return getBean(beanName, (Object) null);
+        return doGetBean(beanName, null, null);
     }
 
     @Override
