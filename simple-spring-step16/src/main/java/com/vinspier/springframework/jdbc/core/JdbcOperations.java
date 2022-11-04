@@ -21,6 +21,14 @@ public interface JdbcOperations {
      * 执行外部自定义callback
      * */
     <T> T execute(StatementCallback<T> callback);
+
+    /**
+     * 预编译执行
+     * */
+    <T> T execute(String sql,ResultSetExtractor<T> extractor,Object... args);
+
+    <T> T execute(PreparedStatementCreator statementCreator,PreparedStatementSetter statementSetter,ResultSetExtractor<T> extractor);
+
     //==================== basic jdbc execute operation support ====================
 
     //==================== basic query operation support ====================
@@ -28,9 +36,11 @@ public interface JdbcOperations {
 
     <T> T query(String sql,ResultSetExtractor<T> extractor);
 
-    <T> List<T> query(String sql,Object[] args, RowMapper<T> rowMapper);
+    <T> List<T> query(String sql, RowMapper<T> rowMapper,Object... args);
 
-    <T> T query(String sql,Object[] args,ResultSetExtractor<T> extractor);
+    <T> T query(String sql,ResultSetExtractor<T> extractor,Object... args);
+
+    <T> T query(String sql,PreparedStatementSetter statementSetter,ResultSetExtractor<T> extractor);
     //==================== basic query operation support ====================
 
     //==================== list query operation support ====================
@@ -43,7 +53,7 @@ public interface JdbcOperations {
      * 预编译 列表查询
      * sql条件占位符 args可传参数
      * */
-    List<Map<String,Object>> queryForList(String sql,Object[] args);
+    List<Map<String,Object>> queryForList(String sql,Object... args);
 
     /**
      * 列表 单字段查询
@@ -54,7 +64,7 @@ public interface JdbcOperations {
      * 预编译 列表查询 单字段查询
      * sql条件占位符 args可传参数
      * */
-    <T> List<T> queryForList(String sql,Object[] args,Class<T> requiredType);
+    <T> List<T> queryForList(String sql,Class<T> requiredType,Object... args);
     //==================== list query operation support ====================
 
     //==================== single object query operation support ====================
@@ -68,12 +78,17 @@ public interface JdbcOperations {
      * 预编译查询 指定行转换器
      * sql条件占位符 args可传参数
      * */
-    <T> T queryForObject(String sql,Object[] args,RowMapper<T> rowMapper);
+    <T> T queryForObject(String sql,RowMapper<T> rowMapper,Object... args);
 
     /**
      * 单行单列字段查询
      * */
     <T> T queryForObject(String sql,Class<T> requiredType);
+
+    /**
+     * 预编译 单行单列字段查询
+     * */
+    <T> T queryForObject(String sql,Class<T> requiredType,Object... args);
     //==================== single object query operation support ====================
 
     //==================== map query operation support ====================
@@ -86,7 +101,7 @@ public interface JdbcOperations {
      * 预编译查询 单行记录 解析列数据
      * sql条件占位符 args可传参数
      * */
-    Map<String,Object> queryForMap(String sql,Object[] args);
+    Map<String,Object> queryForMap(String sql,Object... args);
 
     //==================== map query operation support ====================
 

@@ -19,6 +19,7 @@ public class JdbcTest {
         this.jdbcTemplate = applicationContext.getBean(JdbcTemplate.class);
     }
 
+    // ---------------------------- test simple statement ----------------------------
     @Test
     public void testExecuteSql() {
         String sql = "SELECT COUNT(1) FROM tb_spu";
@@ -53,6 +54,26 @@ public class JdbcTest {
         System.out.println(result);
     }
 
+    // ---------------------------- test prepared statement ----------------------------
+    @Test
+    public void testPreparedQueryForMap() {
+        String sql = "SELECT title FROM tb_spu where id = ?";
+        Map<String,Object> result = jdbcTemplate.queryForMap(sql,2);
+        System.out.println(result);
+    }
 
+    @Test
+    public void testPreparedQueryForList() {
+        String sql = "SELECT title FROM tb_spu where id < ?";
+        List<Map<String,Object>> result = jdbcTemplate.queryForList(sql,10);
+        System.out.println(result);
+    }
+
+    @Test
+    public void testPreparedQueryForObject() {
+        String sql = "SELECT title FROM tb_spu where id = ?";
+        List<Map<String,Object>> result = jdbcTemplate.queryForList(sql,10);
+        System.out.println(result);
+    }
 
 }

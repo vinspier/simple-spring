@@ -10,7 +10,7 @@ public class UncategorizedSQLException extends RuntimeException{
         super(message);
     }
 
-    public UncategorizedSQLException(String task, String sql, Throwable cause) {
-        super(sql, cause);
+    public UncategorizedSQLException(String desc, String sql, Throwable cause) {
+        super(String.format("%s sql: %s",desc,sql), cause);
     }
 }

@@ -8,10 +8,7 @@ import com.vinspier.springframework.util.CollectionsUtils;
 import com.vinspier.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.List;
 import java.util.Map;
 
@@ -72,10 +69,52 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
         } catch (SQLException e) {
             String sql = getSql(callback);
             JdbcUtils.closeStatement(statement);
-            throw new UncategorizedSQLException("",sql,e);
+            throw new UncategorizedSQLException("statement execute failed ",sql,e);
         } finally {
             if (closeResource) {
                 JdbcUtils.closeStatement(statement);
+            }
+        }
+    }
+
+    @Override
+    public <T> T execute(String sql, ResultSetExtractor<T> extractor,Object... args) {
+        PreparedStatementCreator statementCreator = new SimplePreparedStatementCreator(sql);
+        PreparedStatementSetter statementSetter = getArgsPreparedStatementSetter(args);
+        return execute(statementCreator,statementSetter,extractor);
+    }
+
+    @Override
+    public <T> T execute(PreparedStatementCreator statementCreator, PreparedStatementSetter statementSetter, ResultSetExtractor<T> extractor) {
+        PreparedStatementCallback<T> callback = (pst) -> {
+            ResultSet resultSet;
+            if (statementSetter != null) {
+                statementSetter.setValues(pst);
+            }
+            resultSet = pst.executeQuery();
+            return extractor.extractData(resultSet);
+        };
+        return execute(statementCreator,callback,true);
+    }
+
+    /**
+     * 底层执行预编译语句
+     * */
+    private  <T> T execute(PreparedStatementCreator statementCreator,PreparedStatementCallback<T> callback,boolean closeResource) {
+        Connection connection = DatasourceUtils.getConnection(obtainDataSource());
+        PreparedStatement pst = null;
+        try {
+            pst = statementCreator.getPreparedStatement(connection);
+            applyStatementSettings(pst);
+            T result = callback.doInPreparedStatement(pst);
+            return result;
+        } catch (SQLException e) {
+            String sql = getSql(callback);
+            JdbcUtils.closeStatement(pst);
+            throw new UncategorizedSQLException("prepared statement execute failed ",sql,e);
+        } finally {
+            if (closeResource) {
+                JdbcUtils.closeStatement(pst);
             }
         }
     }
@@ -109,14 +148,19 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     }
 
     @Override
-    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
-        return query(sql,args,new RowMapperResultSetExtractor<>(rowMapper));
+    public <T> List<T> query(String sql, RowMapper<T> rowMapper,Object... args) {
+        return query(sql,new RowMapperResultSetExtractor<>(rowMapper),args);
     }
 
     @Override
-    public <T> T query(String sql, Object[] args, ResultSetExtractor<T> extractor) {
-        // todo
-        return null;
+    public <T> T query(String sql, ResultSetExtractor<T> extractor,Object... args) {
+        return query(sql,getArgsPreparedStatementSetter(args),extractor);
+    }
+
+    @Override
+    public <T> T query(String sql, PreparedStatementSetter statementSetter, ResultSetExtractor<T> extractor) {
+        PreparedStatementCreator statementCreator = new SimplePreparedStatementCreator(sql);
+        return execute(statementCreator,statementSetter,extractor);
     }
 
     @Override
@@ -126,7 +170,7 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
     @Override
     public List<Map<String, Object>> queryForList(String sql, Object[] args) {
-        return query(sql,args,getColumnRowMapper());
+        return query(sql,getColumnRowMapper(),args);
     }
 
     @Override
@@ -135,8 +179,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     }
 
     @Override
-    public <T> List<T> queryForList(String sql, Object[] args, Class<T> requiredType) {
-        return query(sql,args,getSingleColumnRowMapper(requiredType));
+    public <T> List<T> queryForList(String sql, Class<T> requiredType,Object... args) {
+        return query(sql,getSingleColumnRowMapper(requiredType),args);
     }
 
     @Override
@@ -152,8 +196,8 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     }
 
     @Override
-    public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
-        List<T> result = query(sql,args,new RowMapperResultSetExtractor<>(rowMapper,1));
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper,Object... args) {
+        List<T> result = query(sql,new RowMapperResultSetExtractor<>(rowMapper,1),args);
         if (CollectionsUtils.isEmpty(result)) {
             throw new IncorrectCountException(1,0);
         }
@@ -169,13 +213,18 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     }
 
     @Override
+    public <T> T queryForObject(String sql, Class<T> requiredType, Object... args) {
+        return queryForObject(sql,getSingleColumnRowMapper(requiredType),args);
+    }
+
+    @Override
     public Map<String, Object> queryForMap(String sql) {
         return result(queryForObject(sql,getColumnRowMapper()));
     }
 
     @Override
-    public Map<String, Object> queryForMap(String sql, Object[] args) {
-        return result(queryForObject(sql,args,getColumnRowMapper()));
+    public Map<String, Object> queryForMap(String sql, Object... args) {
+        return result(queryForObject(sql,getColumnRowMapper(),args));
     }
 
     /**
@@ -195,6 +244,34 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
     protected <T> RowMapper<T> getSingleColumnRowMapper(Class<T> requiredType) {
         return new SingleColumnRowMapper<>(requiredType);
+    }
+
+    protected ArgumentPreparedStatementSetter getArgsPreparedStatementSetter(Object[] args) {
+        return new ArgumentPreparedStatementSetter(args);
+    }
+
+    /**
+     * 简易 预编译执行器 生成器
+     * // todo 可根据Connection的prepareStatement接口能力 指定不同的 预编译执行器
+     * */
+    private static class SimplePreparedStatementCreator implements PreparedStatementCreator,SqlProvider {
+
+        private final String sql;
+
+        public SimplePreparedStatementCreator(String sql) {
+            this.sql = sql;
+        }
+
+        @Override
+        public String getSql() {
+            return sql;
+        }
+
+        @Override
+        public PreparedStatement getPreparedStatement(Connection connection) throws SQLException {
+            return connection.prepareStatement(sql);
+        }
+
     }
 
     /**
