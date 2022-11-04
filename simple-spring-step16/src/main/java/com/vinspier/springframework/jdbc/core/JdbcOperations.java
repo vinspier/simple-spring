@@ -27,12 +27,67 @@ public interface JdbcOperations {
     <T> List<T> query(String sql, RowMapper<T> rowMapper);
 
     <T> T query(String sql,ResultSetExtractor<T> extractor);
+
+    <T> List<T> query(String sql,Object[] args, RowMapper<T> rowMapper);
+
+    <T> T query(String sql,Object[] args,ResultSetExtractor<T> extractor);
     //==================== basic query operation support ====================
 
     //==================== list query operation support ====================
     /**
-     * 查询 行列表
+     * 列表查询 指定行转换器
      * */
     List<Map<String,Object>> queryForList(String sql);
+
+    /**
+     * 预编译 列表查询
+     * sql条件占位符 args可传参数
+     * */
+    List<Map<String,Object>> queryForList(String sql,Object[] args);
+
+    /**
+     * 列表 单字段查询
+     * */
+    <T> List<T> queryForList(String sql,Class<T> requiredType);
+
+    /**
+     * 预编译 列表查询 单字段查询
+     * sql条件占位符 args可传参数
+     * */
+    <T> List<T> queryForList(String sql,Object[] args,Class<T> requiredType);
     //==================== list query operation support ====================
+
+    //==================== single object query operation support ====================
+    /**
+     * 查询 指定行转换器
+     *
+     * */
+    <T> T queryForObject(String sql,RowMapper<T> rowMapper);
+
+    /**
+     * 预编译查询 指定行转换器
+     * sql条件占位符 args可传参数
+     * */
+    <T> T queryForObject(String sql,Object[] args,RowMapper<T> rowMapper);
+
+    /**
+     * 单行单列字段查询
+     * */
+    <T> T queryForObject(String sql,Class<T> requiredType);
+    //==================== single object query operation support ====================
+
+    //==================== map query operation support ====================
+    /**
+     * 查询 单行记录 解析列数据
+     * */
+    Map<String,Object> queryForMap(String sql);
+
+    /**
+     * 预编译查询 单行记录 解析列数据
+     * sql条件占位符 args可传参数
+     * */
+    Map<String,Object> queryForMap(String sql,Object[] args);
+
+    //==================== map query operation support ====================
+
 }

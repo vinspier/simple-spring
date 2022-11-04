@@ -32,4 +32,27 @@ public class JdbcTest {
         System.out.println(resultMap.size());
     }
 
+    @Test
+    public void testQuerySingleObjectList() {
+        String sql = "SELECT title FROM tb_spu limit 10";
+        List<String> result = jdbcTemplate.queryForList(sql,String.class);
+        System.out.println(result);
+    }
+
+    @Test
+    public void testQueryForMap() {
+        String sql = "SELECT * FROM tb_spu where id = 2";
+        Map<String,Object> result = jdbcTemplate.queryForMap(sql);
+        System.out.println(result.toString());
+    }
+
+    @Test
+    public void testQuerySingleObject() {
+        String sql = "SELECT title FROM tb_spu where id = 2";
+        String result = jdbcTemplate.queryForObject(sql,String.class);
+        System.out.println(result);
+    }
+
+
+
 }

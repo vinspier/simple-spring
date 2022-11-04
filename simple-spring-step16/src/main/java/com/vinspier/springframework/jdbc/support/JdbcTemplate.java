@@ -1,8 +1,10 @@
 package com.vinspier.springframework.jdbc.support;
 
+import com.vinspier.springframework.jdbc.IncorrectCountException;
 import com.vinspier.springframework.jdbc.UncategorizedSQLException;
 import com.vinspier.springframework.jdbc.core.*;
 import com.vinspier.springframework.jdbc.datasource.DatasourceUtils;
+import com.vinspier.springframework.util.CollectionsUtils;
 import com.vinspier.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
@@ -107,8 +109,73 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
     }
 
     @Override
+    public <T> List<T> query(String sql, Object[] args, RowMapper<T> rowMapper) {
+        return query(sql,args,new RowMapperResultSetExtractor<>(rowMapper));
+    }
+
+    @Override
+    public <T> T query(String sql, Object[] args, ResultSetExtractor<T> extractor) {
+        // todo
+        return null;
+    }
+
+    @Override
     public List<Map<String, Object>> queryForList(String sql) {
         return query(sql,getColumnRowMapper());
+    }
+
+    @Override
+    public List<Map<String, Object>> queryForList(String sql, Object[] args) {
+        return query(sql,args,getColumnRowMapper());
+    }
+
+    @Override
+    public <T> List<T> queryForList(String sql, Class<T> requiredType) {
+        return query(sql,getSingleColumnRowMapper(requiredType));
+    }
+
+    @Override
+    public <T> List<T> queryForList(String sql, Object[] args, Class<T> requiredType) {
+        return query(sql,args,getSingleColumnRowMapper(requiredType));
+    }
+
+    @Override
+    public <T> T queryForObject(String sql, RowMapper<T> rowMapper) {
+        List<T> result = query(sql,rowMapper);
+        if (CollectionsUtils.isEmpty(result)) {
+            throw new IncorrectCountException(1,0);
+        }
+        if (result.size() != 1) {
+            throw new IncorrectCountException(1,result.size());
+        }
+        return result.iterator().next();
+    }
+
+    @Override
+    public <T> T queryForObject(String sql, Object[] args, RowMapper<T> rowMapper) {
+        List<T> result = query(sql,args,new RowMapperResultSetExtractor<>(rowMapper,1));
+        if (CollectionsUtils.isEmpty(result)) {
+            throw new IncorrectCountException(1,0);
+        }
+        if (result.size() != 1) {
+            throw new IncorrectCountException(1,result.size());
+        }
+        return result.iterator().next();
+    }
+
+    @Override
+    public <T> T queryForObject(String sql, Class<T> requiredType) {
+        return queryForObject(sql,getSingleColumnRowMapper(requiredType));
+    }
+
+    @Override
+    public Map<String, Object> queryForMap(String sql) {
+        return result(queryForObject(sql,getColumnRowMapper()));
+    }
+
+    @Override
+    public Map<String, Object> queryForMap(String sql, Object[] args) {
+        return result(queryForObject(sql,args,getColumnRowMapper()));
     }
 
     /**
@@ -124,6 +191,10 @@ public class JdbcTemplate extends JdbcAccessor implements JdbcOperations {
 
     protected RowMapper<Map<String,Object>> getColumnRowMapper() {
         return new ColumnRowMapper();
+    }
+
+    protected <T> RowMapper<T> getSingleColumnRowMapper(Class<T> requiredType) {
+        return new SingleColumnRowMapper<>(requiredType);
     }
 
     /**
