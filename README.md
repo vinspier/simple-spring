@@ -242,3 +242,36 @@ ___
     + 实现 转换服务 具体转换行为
     + ***定义转换器适配器*** ConverterAdapter
     + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter
+
+---
+### 数据操作模版支持JdbcTemplate
++ 1、数据通用操作抽象 JdbcOperations
+  + 数据链接配置作为JSPI方式有外部决定注入 JdbcAccessor
+  + 数据操作的具体底层支持实现 JdbcTemplate
+
++ 2、查询行数据结果映射器 RowMapper
+  + 抽象映射器 AbstractRowMapper
+    + 通用列名、列值获取
+  + 单列数据映射器 SingleColumnRowMapper
+    + 直接转成对应的结果
+  + 多列数据映射器 ColumnRowMapper
+    + 转成 [{列名-> 列值}] 数组
+  + 可利用spring内部提供的值转换服务 ConversionService
+
++ 3、数据结果提取器 ResultSetExtractor
+  + 行数据转换结果提取器 包转成List RowMapperResultSetExtractor
+
++ 4、sql执行申明回调
+  + 直接执行申明回调 StatementCallback
+  + 预编译执行声明回调 PreparedStatementCallback
+    + 预编译执行语句构建器 PreparedStatementCreator
+    + 预编译执行参数设置器 PreparedStatementSetter
+      + 可选参数式设置器 ArgumentPreparedStatementSetter
+
++ 5、jdbc底层执行操作支持类
+  + 数据源工具 DatasourceUtils
+    + 管理数据源链接
+  + jdbc执行相关工具 JdbcUtils
+    + 管理执行链接的链接、关闭
+    + 提供获取列名、列值解析工作
+---

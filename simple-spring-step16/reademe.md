@@ -1,4 +1,4 @@
-# 简易基础spring容器 - version 3.4
+# 简易基础spring容器 - version 4.0
 ---
 ## 核心模型
 ---
@@ -231,39 +231,64 @@ ___
     + ***定义转换器适配器*** ConverterAdapter
     + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter
 ---
-## 较上一个版本3.4 改动 增加属性类型转换器支持
-+ 1、转换器 Converter
-  + 框架内置 [字符串-> 数字] 转换器 StringToNumberConverter
-    + 可通过 StringToNumberConverterFactory工厂创建
-  + 程序外置 [字符串-> 日期] 转换器 StringToLocalDateConverter
-    + 通过配置 转换服务工厂Bean注入 ConversionServiceFactoryBean
+### 数据操作模版支持JdbcTemplate
++ 1、数据通用操作抽象 JdbcOperations
+  + 数据链接配置作为JSPI方式有外部决定注入 JdbcAccessor
+  + 数据操作的具体底层支持实现 JdbcTemplate
 
-+ 2、转转器生成工厂 ConverterFactory
-  + 框架内置 [字符串-> 数字] 转换器工厂 StringToNumberConverterFactory
++ 2、查询行数据结果映射器 RowMapper
+  + 抽象映射器 AbstractRowMapper
+    + 通用列名、列值获取
+  + 单列数据映射器 SingleColumnRowMapper
+    + 直接转成对应的结果
+  + 多列数据映射器 ColumnRowMapper
+    + 转成 [{列名-> 列值}] 数组
+  + 可利用spring内部提供的值转换服务 ConversionService
 
-+ 3、通用转化器配置管理 GenericConverter
-  + 转换类型配置项 ConvertiblePair
-    + sourceType <-> targetType
-  + 定义获取转换器可支持转换类型集 getConvertiblePairTypes
-  + 定义转换通用行为 convert
++ 3、数据结果提取器 ResultSetExtractor
+  + 行数据转换结果提取器 包转成List RowMapperResultSetExtractor
+
++ 4、sql执行申明回调
+  + 直接执行申明回调 StatementCallback
+  + 预编译执行声明回调 PreparedStatementCallback
+    + 预编译执行语句构建器 PreparedStatementCreator
+    + 预编译执行参数设置器 PreparedStatementSetter
+      + 可选参数式设置器 ArgumentPreparedStatementSetter
+
++ 5、jdbc底层执行操作支持类
+  + 数据源工具 DatasourceUtils
+    + 管理数据源链接
+  + jdbc执行相关工具 JdbcUtils
+    + 管理执行链接的链接、关闭
+    + 提供获取列名、列值解析工作 
+---
+## 较上一个版本3.5 改动 增加mysql数据库jdbc模版操作支持
++ 1、数据通用操作抽象 JdbcOperations
+  + 数据链接配置作为JSPI方式有外部决定注入 JdbcAccessor
+  + 数据操作的具体底层支持实现 JdbcTemplate
   
-+ 4、转换器注册器 ConverterRegistry
-  + 定义注册行为
-  + 注册 具体转换器、通用转换器适配、转换器生成工厂
++ 2、查询行数据结果映射器 RowMapper
+  + 抽象映射器 AbstractRowMapper
+    + 通用列名、列值获取
+  + 单列数据映射器 SingleColumnRowMapper
+    + 直接转成对应的结果
+  + 多列数据映射器 ColumnRowMapper
+    + 转成 [{列名-> 列值}] 数组
+  + 可利用spring内部提供的值转换服务 ConversionService
 
-+ 5、转换器服务中心 ConversionService
-  + 顶层设计 转换行为定义 canConvert、convert
-  + 通用服务实现 GenericConversionService
-    + 转换类型配置与转换器配置 Map<GenericConverter.ConvertiblePair,GenericConverter> converters
-    + 实现 转化器注册器行为
-    + 实现 转换服务 具体转换行为
-    + ***定义转换器适配器*** ConverterAdapter
-    + ***定义转换器生产工厂适配器*** ConverterFactoryAdapter
++ 3、数据结果提取器 ResultSetExtractor
+  + 行数据转换结果提取器 包转成List RowMapperResultSetExtractor
 
-+ 6、增加 转换器服务注册和属性处理逻辑
-  + 1、在加载bean配置完毕后，先判断是否需要注册转换器，再提前初始化单例
-    + AbstractApplicationContext -> refresh -> finishedBeanFactoryInitialization
-  + 2、bean容器处理化bean实例之前 处理属性配置
-    + applyBeanPostProcessorBeforeApplyingBeanPropertyValues
-      + AutowiredAnnotationBeanPostProcessor -> postProcessPropertyValues
-    + applyBeanPropertyValues
++ 4、sql执行申明回调
+  + 直接执行申明回调 StatementCallback
+  + 预编译执行声明回调 PreparedStatementCallback
+    + 预编译执行语句构建器 PreparedStatementCreator
+    + 预编译执行参数设置器 PreparedStatementSetter
+      + 可选参数式设置器 ArgumentPreparedStatementSetter
+
++ 5、jdbc底层执行操作支持类
+  + 数据源工具 DatasourceUtils
+    + 管理数据源链接
+  + jdbc执行相关工具 JdbcUtils
+    + 管理执行链接的链接、关闭
+    + 提供获取列名、列值解析工作

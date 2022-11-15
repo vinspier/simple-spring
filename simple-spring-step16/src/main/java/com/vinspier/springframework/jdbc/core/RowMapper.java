@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
- * 查询结果 行数据转换
+ * 查询结果 行数据映射
  *
  * @author  xiaobiao.fan
  * @date    2022/11/3 2:08 下午
