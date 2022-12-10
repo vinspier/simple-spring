@@ -18,4 +18,17 @@ public interface ConfigurableListableBeanFactory extends ListableBeanFactory, Co
     void addBeanPostProcessor(BeanPostProcessor processor);
 
     void preInstantiateSingletons();
+
+    /**
+     * 注册 可支持的依赖
+     * */
+    void registryResolvableDependency(Class<?> dependencyType,Object autowiredValue);
+
+    /**
+     * 简单处理
+     * 是否 其他非容器bean的实例 可自动装配
+     * */
+    boolean isResolvableDependencyAutowiredAvailable(Class<?> dependencyType);
+
+    Object getResolvableDependency(Class<?> dependencyType);
 }

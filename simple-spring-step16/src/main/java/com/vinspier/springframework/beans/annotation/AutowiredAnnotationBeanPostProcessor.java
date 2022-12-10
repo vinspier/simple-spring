@@ -88,7 +88,10 @@ public class AutowiredAnnotationBeanPostProcessor implements InstantiationAwareB
                     fetchedBean = beanFactory.getBean(qualifierBeanName,filedType);
                 }
                 if (null == fetchedBean) {
-                    throw new BeansException(String.format("could not find a bean of %s type by autowired annotation",filedType.getSimpleName()));
+                    fetchedBean = beanFactory.getResolvableDependency(filedType);
+                    if (fetchedBean == null) {
+                        throw new BeansException(String.format("could not find a bean of %s type by autowired annotation",filedType.getSimpleName()));
+                    }
                 }
                 BeanUtil.setFieldValue(bean,field.getName(),fetchedBean);
             }

@@ -1,13 +1,19 @@
 package com.vinspier.springframework.beans.factory.support;
 
+import cn.hutool.core.lang.Assert;
 import com.vinspier.springframework.beans.exception.BeansException;
 import com.vinspier.springframework.beans.factory.config.BeanDefinition;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFactory implements BeanDefinitionRegistry,ConfigurableListableBeanFactory {
 
     private Map<String,BeanDefinition> beanDefinitionMap = new HashMap<>();
+
+    // 存放非定义的存入容器中的bean 例如applicationContext、BeanFactory容器本身
+    // 在使用@Annotation注解依赖属性时,先从容器中查找bean 若没找到则在该缓存中寻找
+    private Map<Class<?>,Object> resolvableDependenciesMap = new ConcurrentHashMap<>();
 
     @Override
     public BeanDefinition getBeanDefinition(String beanName) {
@@ -72,6 +78,30 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
             throw new BeansException(String.format("class named %s expected single bean but found more than one",type.getSimpleName()));
         }
         return getBean(beanNames.get(0),type);
+    }
+
+    @Override
+    public void registryResolvableDependency(Class<?> dependencyType, Object autowiredValue) {
+        Assert.notNull(dependencyType, "Dependency type must not be null");
+        if (null != autowiredValue) {
+            if (!dependencyType.isInstance(autowiredValue)) {
+                throw new IllegalArgumentException("Value [" + autowiredValue + "] does not implement specified dependency type [" + dependencyType.getName() + "]");
+            }
+            this.resolvableDependenciesMap.put(dependencyType,autowiredValue);
+        }
+    }
+
+    @Override
+    public boolean isResolvableDependencyAutowiredAvailable(Class<?> dependencyType) {
+        return this.resolvableDependenciesMap.containsKey(dependencyType);
+    }
+
+    @Override
+    public Object getResolvableDependency(Class<?> dependencyType) {
+        if (isResolvableDependencyAutowiredAvailable(dependencyType)) {
+            return this.resolvableDependenciesMap.get(dependencyType);
+        }
+        return null;
     }
 
 }
