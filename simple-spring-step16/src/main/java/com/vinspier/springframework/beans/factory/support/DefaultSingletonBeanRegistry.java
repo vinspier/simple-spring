@@ -74,6 +74,9 @@ public class DefaultSingletonBeanRegistry implements SingletonBeanRegistry {
                 ObjectFactory<?> of = singletonFactoriesMap.get(beanName);
                 if (null != of) {
                     result = of.getObject();
+                    // 晋升bean至二级缓存
+                    earlySingletonBeansMap.put(beanName,result);
+                    singletonFactoriesMap.remove(beanName);
                 }
             }
         }

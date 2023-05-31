@@ -208,6 +208,7 @@
     + 存放完整的bean 属性都填充完毕 代理已经完成
   + 二级缓存 Map<String,Object> earlySingletonBeansMap
     + 存放 初始需要暴露被引用的bean 属性还未填充完毕 代理已经完成
+    + 在第三缓存被使用时 三级缓存晋升至二级缓存
   + 三级缓存 Map<String,ObjectFactory<?>> singletonFactoriesMap
     + 存放 bean的创建工厂
     + ObjectFactory<T> 尤其是需要代理工厂创建的实例 会将spring内部实例化的实例进行代理返回代理对象
